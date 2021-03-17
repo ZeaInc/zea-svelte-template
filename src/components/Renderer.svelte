@@ -6,7 +6,6 @@
   import Menu from '../components/ContextMenu/Menu.svelte'
   import MenuOption from '../components/ContextMenu/MenuOption.svelte'
   import Dialog from '../components/Dialog.svelte'
-  import ParameterNumber from '../components/parameters/ParameterNumber.svelte'
   import SearchTool from '../components/SearchTool.svelte'
   import Sidebar from '../components/Sidebar.svelte'
 
@@ -31,7 +30,6 @@
     resourceLoader,
     SystemDesc,
     EnvMap,
-    NumberParameter,
   } = window.zeaEngine
   const { GLCADPass, CADAsset } = window.zeaCad
   const {
@@ -351,8 +349,6 @@
   const closeDialog = () => {
     isDialogOpen = false
   }
-
-  const numberParameter = new NumberParameter('Foo Number', 6, [0, 30], 5)
 </script>
 
 <div class="Renderer flex-1">
@@ -363,10 +359,6 @@
     show-resize-handles="A"
   >
     <div slot="A" class="h-full w-full">
-      <div class="hidden">
-        <ParameterNumber parameter={numberParameter} />
-      </div>
-
       <zea-tabs slot="a" orientation="horizontal">
         <div slot="tab-bar">Assembly</div>
         <div class="tab-content">
