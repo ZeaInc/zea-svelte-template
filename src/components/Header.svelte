@@ -229,9 +229,30 @@
     var img = new Image();
     const { renderer } = $APP_DATA
     img.src = renderer.getGLCanvas().toDataURL('image/png');
+
+    img.onload = function() {
+      var pom = document.createElement('a');
+      pom.setAttribute('href', img.src);
+      pom.setAttribute('download', "image.png");
+
+      if (document.createEvent) {
+          var event = document.createEvent('MouseEvents');
+          event.initEvent('click', true, true);
+          pom.dispatchEvent(event);
+      }
+      else {
+          pom.click();
+      }
+    }
+  }
+
+  const saveSVG = async () => {
+    var img = new Image();
+    const { renderer } = $APP_DATA
+    img.src = renderer.getGLCanvas().toDataURL('image/png');
     console.log(img) 
 
-
+    
     img.onload = function() {
       var pom = document.createElement('a');
       pom.setAttribute('href', img.src);
@@ -350,8 +371,12 @@
         <MenuBarItem label="Save to" let:isOpen>
           <Menu {isOpen}>
             <MenuItem
-              label="PNG"
+              label="PNG file"
               on:click={savePNG}
+            />
+            <MenuItem
+              label="SVG file"
+              on:click={saveSVG}
             />
           </Menu>
         </MenuBarItem>
