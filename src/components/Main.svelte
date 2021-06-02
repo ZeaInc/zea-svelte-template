@@ -148,20 +148,28 @@
       .setValue(selectionRectColor)
 
     /** SELECTION END */
-
+    
     /** UX START */
     //long touch support
+    var mousepressed = false;
+    var timer = null;
+    
     renderer.getViewport().on('pointerDown', (event) => {
-      const timer = setInterval(function(){console.log(event)}, 30000);
-      if (event.button == 2 && event.intersectionData) {
+      mousepressed = true;
+
+      timer = setTimeout(function(){
+        if (event.button == 2 &&  event.intersectionData) {//long touch for any click but we can specifify
         const item = filterItemSelection(event.intersectionData.geomItem)
         openMenu(event, item)
         // stop propagation to prevent the camera manipulator from handling the event.
         event.stopPropagation()
       }
-      clearTimeout(timer)
+      }, 1000);
+      
     })
+    
     renderer.getViewport().on('pointerUp', (event) => {
+      mousepressed = false;
       // Detect a right click
       if (event.button == 0 && event.intersectionData) {
         // if the selection tool is active then do nothing, as it will
@@ -186,6 +194,7 @@
         openMenu(event, item)
         // stop propagation to prevent the camera manipulator from handling the event.
         event.stopPropagation()
+      clearTimeout(timer)//long touch support
       }
     })
 
