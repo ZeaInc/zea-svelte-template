@@ -223,6 +223,31 @@
     })
   }
 
+  // ////////////////////////////////////
+  // Save
+  const savePNG = async () => {
+    var img = new Image();
+    const { renderer } = $APP_DATA
+    img.src = renderer.getGLCanvas().toDataURL('image/png');
+    console.log(img) 
+
+
+    img.onload = function() {
+      var pom = document.createElement('a');
+      pom.setAttribute('href', img.src);
+      pom.setAttribute('download', "image.png");
+
+      if (document.createEvent) {
+          var event = document.createEvent('MouseEvents');
+          event.initEvent('click', true, true);
+          pom.dispatchEvent(event);
+      }
+      else {
+          pom.click();
+      }
+    }
+  }
+
   const handleSignOut = async () => {
     if (session) {
       session.leaveRoom()
@@ -318,6 +343,15 @@
             <MenuItem
               label="Enable Spectator Mode"
               on:click={handleToggleVRSpatatorMode}
+            />
+          </Menu>
+        </MenuBarItem>
+
+        <MenuBarItem label="Save to" let:isOpen>
+          <Menu {isOpen}>
+            <MenuItem
+              label="PNG"
+              on:click={savePNG}
             />
           </Menu>
         </MenuBarItem>
