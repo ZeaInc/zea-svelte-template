@@ -227,7 +227,6 @@
   // ////////////////////////////////////
   // Save
   const launchDownload = async ( data, type=".png", filename="image") => {
-      console.log(data)
       var pom = document.createElement('a');
       if (type == ".svg"){
         var svgsrc = "data:image/svg+xml;utf8," + data
