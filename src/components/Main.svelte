@@ -12,6 +12,7 @@
   import Drawer from '../components/Drawer.svelte'
   import ProgressBar from '../components/ProgressBar.svelte'
   import Sidebar from '../components/Sidebar.svelte'
+  import DropZone from '../components/DropZone.svelte'
 
   import { auth } from '../helpers/auth'
 
@@ -35,14 +36,11 @@
     SystemDesc,
     EnvMap,
     InstanceItem,
+    CameraManipulator,
   } = window.zeaEngine
   const { CADAsset, CADBody } = window.zeaCad
-  const {
-    SelectionManager,
-    UndoRedoManager,
-    ToolManager,
-    SelectionTool,
-  } = window.zeaUx
+  const { SelectionManager, UndoRedoManager, ToolManager, SelectionTool } =
+    window.zeaUx
 
   const { Session, SessionSync } = window.zeaCollab
 
@@ -52,6 +50,8 @@
   const embeddedMode = urlParams.has('embedded')
   const collabEnabled = urlParams.has('collab')
   let progress
+  let files = ''
+  let fileLoaded = false
 
   const filterItemSelection = (item) => {
     // Propagate selections up from the edges and surfaces up to
@@ -66,8 +66,49 @@
     return item
   }
 
+  let renderer
+
+  const loadZCADAsset = (url, filename) => {
+    const asset = new CADAsset()
+    asset.load(url).then(() => {
+      const box = asset.getParameter('BoundingBox').getValue()
+      const xfo = new Xfo()
+      // xfo.ori.setFromAxisAndAngle(new Vec3(1, 0, 0), Math.PI * 0.5)
+      xfo.tr.z = -box.p0.z
+      asset.getParameter('LocalXfo').setValue(xfo)
+      renderer.frameAll()
+    })
+    $assets.addChild(asset)
+    return asset
+  }
+
+  /** LOAD ASSETS METHODS START */
+  const { GLTFAsset } = gltfLoader
+  const loadGLTFAsset = (url, filename) => {
+    const asset = new GLTFAsset('gltf')
+    asset.load(url, filename).then(() => {
+      const box = asset.getParameter('BoundingBox').getValue()
+      const xfo = new Xfo()
+      // xfo.ori.setFromAxisAndAngle(new Vec3(1, 0, 0), Math.PI * 0.5)
+      xfo.tr.z = -box.p0.z
+      asset.getParameter('LocalXfo').setValue(xfo)
+      renderer.frameAll()
+    })
+    $assets.addChild(asset)
+    return asset
+  }
+
+  const loadAsset = (url, fileName) => {
+    if (fileName.endsWith('zcad')) {
+      return loadZCADAsset(url, fileName)
+    } else if (fileName.endsWith('gltf') || fileName.endsWith('glb')) {
+      return loadGLTFAsset(url, fileName)
+    }
+  }
+  /** LOAD ASSETS METHODS END */
+
   onMount(async () => {
-    const renderer = new GLRenderer(canvas)
+    renderer = new GLRenderer(canvas)
 
     $scene = new Scene()
 
@@ -108,6 +149,9 @@
 
     /** SELECTION START */
     const cameraManipulator = renderer.getViewport().getManipulator()
+    cameraManipulator.setDefaultManipulationMode(
+      CameraManipulator.MANIPULATION_MODES.tumbler
+    )
     appData.cameraManipulator = cameraManipulator
     const toolManager = new ToolManager(appData)
     $selectionManager = new SelectionManager(appData, {
@@ -178,26 +222,6 @@
       }
     })
 
-    let highlightedItem
-    renderer.getViewport().on('pointerMove', (event) => {
-      if (event.buttons == 0) {
-        if (event.intersectionData) {
-          const item = filterItemSelection(event.intersectionData.geomItem)
-          if (highlightedItem && item != highlightedItem) {
-            highlightedItem.removeHighlight('pointerOverGeom', true)
-          }
-          highlightedItem = item
-          highlightedItem.addHighlight(
-            'pointerOverGeom',
-            new Color(1, 1, 1, 0.1),
-            true
-          )
-        } else if (highlightedItem) {
-          highlightedItem.removeHighlight('pointerOverGeom', true)
-          highlightedItem = null
-        }
-      }
-    })
     renderer.getViewport().on('pointerDoublePressed', (event) => {
       console.log(event)
     })
@@ -216,50 +240,18 @@
     /** FPS DISPLAY END */
 
     /** LOAD ASSETS START */
-    const loadZCADAsset = (url) => {
-      const asset = new CADAsset()
-      asset.load(url).then(() => {
-        const box = asset.getParameter('BoundingBox').getValue()
-        const xfo = new Xfo()
-        // xfo.ori.setFromAxisAndAngle(new Vec3(1, 0, 0), Math.PI * 0.5)
-        xfo.tr.z = -box.p0.z
-        asset.getParameter('LocalXfo').setValue(xfo)
-        renderer.frameAll()
-      })
-      $assets.addChild(asset)
-      return asset
-    }
-
-    const { GLTFAsset } = gltfLoader
-    const loadGLTFAsset = (url) => {
-      const asset = new GLTFAsset('gltf')
-      asset.load(url).then(() => {
-        const box = asset.getParameter('BoundingBox').getValue()
-        const xfo = new Xfo()
-        // xfo.ori.setFromAxisAndAngle(new Vec3(1, 0, 0), Math.PI * 0.5)
-        xfo.tr.z = -box.p0.z
-        asset.getParameter('LocalXfo').setValue(xfo)
-        renderer.frameAll()
-      })
-      $assets.addChild(asset)
-      return asset
-    }
-
-    const loadAsset = (url) => {
-      if (url.endsWith('zcad')) {
-        return loadZCADAsset(url)
-      } else if (url.endsWith('gltf') || url.endsWith('glb')) {
-        return loadGLTFAsset(url)
-      }
-    }
-
     let assetUrl
     if (!embeddedMode) {
-      if (urlParams.has('zcad')) assetUrl = urlParams.get('zcad')
-      else if (urlParams.has('gltf')) assetUrl = urlParams.get('gltf')
-      if (!assetUrl) assetUrl = '/data/Dead_eye_bearing.zcad'
-
-      loadAsset(assetUrl)
+      if (urlParams.has('zcad')) {
+        assetUrl = urlParams.get('zcad')
+        loadAsset(assetUrl, assetUrl)
+        fileLoaded = true
+      }
+      if (urlParams.has('gltf')) {
+        assetUrl = urlParams.get('gltf')
+        loadAsset(assetUrl, assetUrl)
+        fileLoaded = true
+      }
     }
     /** LOAD ASSETS END */
 
@@ -273,9 +265,10 @@
 
       if (collabEnabled) {
         const SOCKET_URL = 'https://websocket-staging.zea.live'
-        const roomId = assetUrl
+        // const roomId = assetUrl
+        const roomId = urlParams.get('collab')
         const session = new Session(userData, SOCKET_URL)
-        session.joinRoom(roomId)
+        if (roomId) session.joinRoom(roomId)
 
         const sessionSync = new SessionSync(session, appData, userData, {})
 
@@ -369,11 +362,30 @@
     isDialogOpen = false
   }
 
+  /** LOAD ASSETS FROM FILE START */
+
+  const handleCadFile = () => {
+    const objectURL = window.URL.createObjectURL(files)
+
+    const asset = loadAsset(objectURL, files.name)
+
+    if (asset) fileLoaded = true
+  }
+
+  const handleDrop = () => {
+    console.log('test')
+  }
+
+  /** LOAD ASSETS FROM FILE END */
+
   $: parameterOwner = null
 </script>
 
 <main class="Main flex-1 relative">
   <canvas bind:this={canvas} class="absolute h-full w-full" />
+  {#if !fileLoaded}
+    <DropZone bind:files on:changeFile={handleCadFile} />
+  {/if}
 
   <div class="absolute bottom-10 w-full flex justify-center">
     <Toolbar />
