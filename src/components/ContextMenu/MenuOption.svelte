@@ -25,8 +25,8 @@
 
 <style>
   div {
-    background-color: rgb(0,0,0);
-    color: var(--color-foreground-1);
+    background-color: var(--color-background-1);
+    /* color: var(--color-foreground-1); */
     padding: 4px 15px;
     cursor: default;
     font-size: 14px;
@@ -35,6 +35,6 @@
     grid-gap: 5px;
   }
   div:hover {
-    background-color: rgba(114, 109, 109, 0.8);
+    background-color: var(--color-background-2);
   }
 </style>
