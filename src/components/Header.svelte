@@ -1,6 +1,7 @@
 <script>
   import { redirect } from '@roxi/routify'
   import { onMount } from 'svelte'
+  import * as potrace from 'potrace'
 
   const { CameraManipulator } = window.zeaEngine
   const { ToolManager } = window.zeaUx
@@ -223,6 +224,94 @@
     })
   }
 
+  // ////////////////////////////////////
+  // Save
+  const launchDownload = async ( data, type=".png", filename="image") => {
+      console.log(data)
+      var pom = document.createElement('a');
+      if (type == ".svg"){
+        var svgsrc = "data:image/svg+xml;utf8," + data
+        pom.setAttribute('href', svgsrc);
+      }else{
+        pom.setAttribute('href', data)
+      }
+      pom.setAttribute('download', filename+type);
+
+      if (document.createEvent) {
+          var event = document.createEvent('MouseEvents');
+          event.initEvent('click', true, true);
+          pom.dispatchEvent(event);
+      }
+      else {
+          pom.click();
+      }
+  }
+
+  const savePNG = async () => {
+    var img = new Image();
+    const { renderer } = $APP_DATA
+    img.src = renderer.getGLCanvas().toDataURL('image/png');
+
+    img.onload = function() {
+      launchDownload(img.src)
+    }
+  }
+
+  const saveSVG = () => {
+    var img = new Image();
+    const { renderer } = $APP_DATA
+    img.src = renderer.getGLCanvas().toDataURL('image/png');
+    
+    //
+    // default
+    var params = {
+      // background: '#49ffd2',
+      color: 'blue',
+      threshold: 120
+    };
+    potrace.trace(img.src, params, function(err, svg) {
+      if (err) throw err;
+      launchDownload(svg, ".svg", "image-trace-default")
+    });
+    
+    // 
+    // Tracing
+    var trace = new potrace.Potrace();
+    trace.setParameters({
+      threshold: 120,
+      // color: '#880000'
+    });
+    trace.loadImage(img.src, function(err) {
+      if (err) throw err;
+      var svg = trace.getSVG();
+      launchDownload( svg, ".svg", "image-tracing")
+    });
+
+    // 
+    // Posterization
+    var posterizer = new potrace.Posterizer();
+    posterizer.loadImage(img.src, function(err) {
+      if (err) throw err;
+      posterizer.setParameters({
+        // color: '#ccc', //
+        // background: '#222',
+        steps: 3,
+        threshold: 200,
+        // fillStrategy: potrace.Posterizer.FILL_MEAN
+      });
+      var svg = posterizer.getSVG();
+      launchDownload(svg, ".svg", "image-posterization")
+    });
+
+//--------------------------------------------------------------------
+    // new potrace.Potrace()
+    // .loadImage(img.src, function(err, ) {
+    //   if (err) throw err;
+    //   // var svg = this.getSymbol('foo');
+    //   var svg = this.getSVG()
+    //   launchDownload(svg)
+    // });
+  }
   const handleSignOut = async () => {
     if (session) {
       session.leaveRoom()
@@ -318,6 +407,19 @@
             <MenuItem
               label="Enable Spectator Mode"
               on:click={handleToggleVRSpatatorMode}
+            />
+          </Menu>
+        </MenuBarItem>
+
+        <MenuBarItem label="Save to" let:isOpen>
+          <Menu {isOpen}>
+            <MenuItem
+              label="PNG file"
+              on:click={savePNG}
+            />
+            <MenuItem
+              label="SVG file"
+              on:click={saveSVG}
             />
           </Menu>
         </MenuBarItem>
