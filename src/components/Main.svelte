@@ -192,28 +192,48 @@
       .setValue(selectionRectColor)
 
     /** SELECTION END */
-    
+
     /** UX START */
     //long touch support
-    var mousepressed = false;
-    var timer = null;
-    
-    renderer.getViewport().on('pointerDown', (event) => {
-      mousepressed = true;
-
-      timer = setTimeout(function(){
-        if (event.button == 2 &&  event.intersectionData) {//long touch for any click but we can specifify
-        const item = filterItemSelection(event.intersectionData.geomItem)
+    var longTouchTimer = 0
+    const camera = renderer.getViewport().getCamera()
+    const startLongTouchTimer = (event, item) => {
+      longTouchTimer = setTimeout(function () {
+        //long touch for any click but we can specifify
         openMenu(event, item)
-        // stop propagation to prevent the camera manipulator from handling the event.
+        longTouchTimer = 0
+        camera.getParameter('GlobalXfo').off('valueChanged', endLogTouchTimer)
+      }, 1000)
+      camera.getParameter('GlobalXfo').on('valueChanged', endLogTouchTimer)
+    }
+    const endLogTouchTimer = () => {
+      clearTimeout(longTouchTimer)
+      longTouchTimer = 0
+      camera.getParameter('GlobalXfo').off('valueChanged', endLogTouchTimer)
+    }
+
+    renderer.getViewport().on('pointerDown', (event) => {
+      if (isMenuVisible) closeMenu()
+      if (event.pointerType == 'touch' && event.intersectionData) {
+        const item = filterItemSelection(event.intersectionData.geomItem)
+        startLongTouchTimer(event, item)
+      }
+    })
+
+    renderer.getViewport().on('pointerUp', (event) => {
+      // Clear any pending long touch.
+      if (longTouchTimer) {
+        endLogTouchTimer(longTouchTimer)
+      }
+      if (
+        event.pointerType == 'touch' &&
+        event.intersectionData &&
+        isMenuVisible
+      ) {
+        // The menu was opened by the long touch. Prevent any other actions from occuring.
         event.stopPropagation()
       }
-      }, 1000);
-      
-    })
-    
-    renderer.getViewport().on('pointerUp', (event) => {
-      mousepressed = false;
+
       // Detect a right click
       if (event.button == 0 && event.intersectionData) {
         // if the selection tool is active then do nothing, as it will
@@ -238,7 +258,6 @@
         openMenu(event, item)
         // stop propagation to prevent the camera manipulator from handling the event.
         event.stopPropagation()
-      clearTimeout(timer)//long touch support
       }
     })
 
@@ -371,10 +390,13 @@
   let contextItem
   const openMenu = (event, item) => {
     contextItem = item
-    pos = { x: event.clientX, y: event.clientY }
+    pos = event.touches
+      ? { x: event.touches[0].clientX, y: event.touches[0].clientY }
+      : { x: event.clientX, y: event.clientY }
     isMenuVisible = true
   }
   const closeMenu = () => {
+    console.log('closeMenu:')
     isMenuVisible = false
   }
   let isDialogOpen = false
