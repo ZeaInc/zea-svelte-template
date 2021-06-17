@@ -15,7 +15,7 @@
   }
 </script>
 
-<div class="MenuOption text-gray-600" on:click={handleClick}>
+<div class="MenuOption text-gray" on:click={handleClick}>
   {#if text}
     {text}
   {:else}
