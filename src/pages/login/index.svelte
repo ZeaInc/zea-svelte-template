@@ -50,8 +50,7 @@
     const params = kvp.join('&')
 
     // reload page with new params
-    // document.location.search = params
-    $redirect('/?' + params.toString())
+    document.location.search = params
   }
 
   const redirectToMain = () => {
@@ -86,7 +85,6 @@
   onMount(async () => {
     const isAuthenticated = await auth.isAuthenticated()
 
-    console.log("isAuthenticated:",isAuthenticated)
     if (isAuthenticated && (!collabEnabled || urlParams.get('roomId'))) {
       redirectToMain()
       return
