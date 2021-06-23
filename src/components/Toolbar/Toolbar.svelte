@@ -13,7 +13,9 @@
   import IconPerspView from '../icons/IconPerspView.svelte'
   import IconRenderModeWireframe from '../icons/IconRenderModeWireframe.svelte'
   import IconRenderModeFlat from '../icons/IconRenderModeFlat.svelte'
-  import IconRenderModeShaded from '../icons/IconRenderModeShaded.svelte'
+  import IconRenderModeFlatWhite from '../icons/IconRenderModeFlat.svelte'
+  //TO REPLACE BY FLAT WHITE
+  import IconRenderModeShaded from '../icons/IconRenderModeShaded.svelte' 
   import IconRenderModeShadedAndEdges from '../icons/IconRenderModeShadedAndEdges.svelte'
   import IconRenderModePBR from '../icons/IconRenderModePBR.svelte'
   import IconRenderModeHiddenLine from '../icons/IconRenderModeHiddenLine.svelte'
@@ -145,6 +147,7 @@
   const RENDER_MODES = {
     WIREFRAME: Symbol(),
     FLAT: Symbol(),
+    FLAT_WHITE: Symbol(),
     HIDDEN_LINE: Symbol(),
     SHADED: Symbol(),
     SHADED_AND_EDGES: Symbol(),
@@ -204,6 +207,53 @@
       }
     })
   }
+  const handleChangeRenderModeFlatWhite = () => {
+   if (mode == RENDER_MODES.FLAT_WHITE) {
+      return
+    }
+    mode = RENDER_MODES.FLAT_WHITE
+
+    const { assets, scene, renderer } = $APP_DATA
+
+    renderer.outlineThickness = 1
+    renderer.outlineColor = new Color(0.2, 0.2, 0.2, 1)
+
+    const backgroundColor = scene
+                                .getSettings()
+                                .getParameter('BackgroundColor')
+                                .getValue()
+                                
+    assets.traverse((item) => {
+      if (item instanceof GeomItem) {
+        const geom = item.getParameter('Geometry').getValue()
+        if (geom instanceof Mesh || geom instanceof MeshProxy) {
+          item.getParameter('Visible').setValue(true)
+        }
+        createAndAssignMaterial(
+          item,
+          RENDER_MODES.FLAT_WHITE,
+          (newMaterial) =>{
+           
+          // Cache the previous material ID to geom Id assiciation.
+          const material = item.getParameter('Material').getValue()
+          const materialId = material.getId()
+          if (!geomItemToMaterialMapping[geomItemId]) {
+            geomItemToMaterialMapping[geomItemId] = materialId
+          }
+          if (!materials[materialId]) {
+            materials[materialId] = {}
+            materials[materialId][RENDER_MODES.PBR] = material
+          }
+          // Assign the white material to all MEsh geoms.
+          item.getParameter('Material').setValue(materials[materialId])
+          newMaterial.setName('FlatWhite')
+          newMaterial.setShaderName('FlatSurfaceShader')
+          newMaterial.getParameter('BaseColor').setValue(backgroundColor)
+        })
+      }
+    })
+    mode = RENDER_MODES.FLAT_WHITE
+  }
   const handleChangeRenderModeFlat = () => {
     if (mode == RENDER_MODES.FLAT) {
       return
@@ -225,7 +275,10 @@
         if (geom instanceof Mesh || geom instanceof MeshProxy) {
           item.getParameter('Visible').setValue(true)
         }
-        createAndAssignMaterial(item, RENDER_MODES.FLAT, (newMaterial) => {
+        createAndAssignMaterial(
+          item,
+          RENDER_MODES.FLAT,
+          (newMaterial) => {
           newMaterial.setName('Flat')
           const shaderName = newMaterial.getShaderName()
           if (shaderName == 'LinesShader') {
@@ -390,6 +443,13 @@
         on:click={handleChangeRenderModeFlat}
       >
         <IconRenderModeFlat />
+      </ToolbarItem>
+      <ToolbarItem
+        isHighlighted={mode === RENDER_MODES.FLAT_WHITE}
+        title="FlatWhite"
+        on:click={handleChangeRenderModeFlatWhite}
+      >
+        <IconRenderModeFlatWhite />
       </ToolbarItem>
       <ToolbarItem
         isHighlighted={mode === RENDER_MODES.HIDDEN_LINE}
