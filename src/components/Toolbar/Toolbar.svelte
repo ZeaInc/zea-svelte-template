@@ -211,12 +211,12 @@
     })
     if (pub && session) session.pub('setRenderMode', { mode: 'WIREFRAME' })
   }
-  const handleChangeRenderModeFlatWhite = () => {
+  const handleChangeRenderModeFlatWhite = (pub=true) => {
     if (mode == RENDER_MODES.FLAT_WHITE) {
       return
     }
     mode = RENDER_MODES.FLAT_WHITE
-    const { assets, scene, renderer } = $APP_DATA
+    const { assets, scene, renderer, session } = $APP_DATA
     renderer.outlineThickness = 1
     renderer.outlineColor = new Color(0.2, 0.2, 0.2, 1)
     const backgroundColor = scene
@@ -237,6 +237,7 @@
       }
     })
     mode = RENDER_MODES.FLAT_WHITE
+    if (pub && session) session.pub('setRenderMode', { mode: 'FLAT_WHITE' })
   }
   const handleChangeRenderModeFlat = (pub=true) => {
     if (mode == RENDER_MODES.FLAT) {
@@ -404,6 +405,9 @@
             break
           case 'FLAT': 
             handleChangeRenderModeFlat(false)
+            break
+          case 'FLAT_WHITE': 
+            handleChangeRenderModeFlatWhite(false)
             break
           case 'HIDDEN_LINE': 
             handleChangeRenderModeHiddenLine(false)
