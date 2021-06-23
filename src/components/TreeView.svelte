@@ -136,13 +136,39 @@
   }
 </script>
 
+<style>
+  *{box-sizing: border-box;}
+  table{border-collapse:collapse;}
+  th{padding:5px 15px;text-align:left;}
+  table,tr, th{border:1px solid #000;}
+</style>
+
+
+<table id="tableId" border="1"> 
+  
+    
 <div bind:this={treeEl} class="TreeView min-w-max noselect">
+  <thead>
+    <tr>
+    <th>Name</th>
+    <th>Rev</th>
+    <th>Description</th>
+    <th>Model Name</th>
+    </tr>
+  </thead>
+  
   {#each rootTreeItems as item, i}
-    <TreeViewItem
+  
+  <!-- <tbody>  -->
+  <TreeViewItem
       {item}
       {selectionManager}
       {undoRedoManager}
       bind:this={childComponents[i]}
     />
-  {/each}
+     
+<!-- </tbody>   -->
+  {/each}   
 </div>
+
+</table> 

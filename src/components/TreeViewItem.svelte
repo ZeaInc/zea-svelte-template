@@ -171,9 +171,19 @@
     }
   })
 </script>
+<style>
+  /* *{box-sizing: border-box;} */
+  th{padding:5px 15px;text-align:left;}
+  th{border:1px solid #000;}
+</style>
+
 
 {#if item}
+<tbody>
+<tr> 
   <div bind:this={el} class="TreeItem" class:text-gray-500={!visible}>
+  <th>
+   
     <div
       class="TreeItem__header flex items-center cursor-default hover:bg-gray-800 transition-colors mb-1"
     >
@@ -217,7 +227,7 @@
         {item.getName()}
       </span>
     </div>
-
+  </th>
     {#if hasChildren && isExpanded}
       <div
         class="TreeItem__body ml-4 pl-4 md:ml-3 md:pl-3 border-dotted border-l-2 md:border-l"
@@ -235,4 +245,11 @@
       </div>
     {/if}
   </div>
+  
+    
+  <th> rev </th> 
+  <th> desc </th> 
+  <th> {item.getName()} </th> 
+  </tr> 
+</tbody>
 {/if}
