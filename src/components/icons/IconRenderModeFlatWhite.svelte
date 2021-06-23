@@ -1,3 +1,6 @@
+<script>
+</script>
+
 <svg
   version="1.1"
   viewBox="0.0 0.0 108.9238845144357 108.94750656167979"
@@ -99,45 +102,6 @@
       stroke-linejoin="round"
       stroke-linecap="butt"
       d="m75.39114 31.120354l0.42572784 69.36592l23.830978 -23.618652l0 -69.15306z"
-      fill-rule="evenodd"
-    /><path
-      fill="#000000"
-      fill-opacity="0.0"
-      d="m7.3956966 101.59434l25.417322 -25.41732"
-      fill-rule="evenodd"
-    /><path
-      stroke="#000000"
-      stroke-width="3.0"
-      stroke-linejoin="round"
-      stroke-linecap="butt"
-      stroke-dasharray="12.0,9.0"
-      d="m7.3956966 101.59434l25.417322 -25.41732"
-      fill-rule="evenodd"
-    /><path
-      fill="#000000"
-      fill-opacity="0.0"
-      d="m99.86645 77.66052l-68.125984 0"
-      fill-rule="evenodd"
-    /><path
-      stroke="#000000"
-      stroke-width="3.0"
-      stroke-linejoin="round"
-      stroke-linecap="butt"
-      stroke-dasharray="12.0,9.0"
-      d="m99.86645 77.66052l-68.125984 0"
-      fill-rule="evenodd"
-    /><path
-      fill="#000000"
-      fill-opacity="0.0"
-      d="m30.447966 8.738557l0 69.13386"
-      fill-rule="evenodd"
-    /><path
-      stroke="#000000"
-      stroke-width="3.0"
-      stroke-linejoin="round"
-      stroke-linecap="butt"
-      stroke-dasharray="12.0,9.0"
-      d="m30.447966 8.738557l0 69.13386"
       fill-rule="evenodd"
     /></g
   ></svg
