@@ -218,6 +218,7 @@
     renderer.outlineThickness = 1
     renderer.outlineColor = new Color(0.2, 0.2, 0.2, 1)
 
+    
     const backgroundColor = scene
                                 .getSettings()
                                 .getParameter('BackgroundColor')
@@ -233,21 +234,17 @@
           item,
           RENDER_MODES.FLAT_WHITE,
           (newMaterial) =>{
-           
-          // Cache the previous material ID to geom Id assiciation.
-          const material = item.getParameter('Material').getValue()
-          const materialId = material.getId()
-          if (!geomItemToMaterialMapping[geomItemId]) {
-            geomItemToMaterialMapping[geomItemId] = materialId
-          }
-          if (!materials[materialId]) {
-            materials[materialId] = {}
-            materials[materialId][RENDER_MODES.PBR] = material
-          }
           // Assign the white material to all MEsh geoms.
-          item.getParameter('Material').setValue(materials[materialId])
+          item.getParameter('Material').setValue(newMaterial)
           newMaterial.setName('FlatWhite')
-          newMaterial.setShaderName('FlatSurfaceShader')
+          
+          if (newMaterial.getShaderName() == 'LinesShader') {
+            if (newMaterial.hasParameter('OccludedStippleValue')) {
+              newMaterial.getParameter('OccludedStippleValue').setValue(1)
+            }
+          } else {
+            newMaterial.setShaderName('FlatSurfaceShader')
+          }
           newMaterial.getParameter('BaseColor').setValue(backgroundColor)
         })
       }
