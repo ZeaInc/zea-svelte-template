@@ -172,17 +172,21 @@
   })
 </script>
 <style>
-  /* *{box-sizing: border-box;} */
-  th{padding:5px 15px;text-align:left;}
-  th{border:1px solid #000;}
+  /* th, td{padding:5px 15px;text-align:left;} */
+  td {
+  padding: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+  
 </style>
 
-
 {#if item}
-<tbody>
+<!-- <tbody> -->
 <tr> 
   <div bind:this={el} class="TreeItem" class:text-gray-500={!visible}>
-  <th>
+  <td>
    
     <div
       class="TreeItem__header flex items-center cursor-default hover:bg-gray-800 transition-colors mb-1"
@@ -227,7 +231,7 @@
         {item.getName()}
       </span>
     </div>
-  </th>
+  </td>
     {#if hasChildren && isExpanded}
       <div
         class="TreeItem__body ml-4 pl-4 md:ml-3 md:pl-3 border-dotted border-l-2 md:border-l"
@@ -246,10 +250,20 @@
     {/if}
   </div>
   
-    
-  <th> rev </th> 
-  <th> desc </th> 
-  <th> {item.getName()} </th> 
+  {#if item.getParameter('Rev')} 
+  <td> {item.getParameter('Rev').getValue()} </td> 
+  {:else}
+  <td> - </td> 
+  
+  {/if}
+  
+  {#if item.getParameter('Description')} 
+  <td> {item.getParameter('Description').getValue()} </td> 
+  {:else}
+  <td> - </td> 
+  {/if}
+  
+  <td> {item.getName()} </td> 
   </tr> 
-</tbody>
+<!-- </tbody> -->
 {/if}

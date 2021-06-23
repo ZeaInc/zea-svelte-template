@@ -12,6 +12,71 @@
   export let onKeyDownRegistered = false
   export let selectionChangedRegistered = false
 
+//
+//
+// renderer = new GLRenderer(canvas)
+
+//     $scene = new Scene()
+
+//     // Assigning an Environment Map enables PBR lighting for niceer shiny surfaces.
+//     if (!SystemDesc.isMobileDevice && SystemDesc.gpuDesc.supportsWebGL2) {
+//       const envMap = new EnvMap('envMap')
+//       envMap.getParameter('FilePath').setValue('data/StudioG.zenv')
+//       envMap.getParameter('HeadLightMode').setValue(true)
+//       $scene.getSettings().getParameter('EnvMap').setValue(envMap)
+//     }
+
+//     renderer.outlineThickness = 1
+//     renderer.outlineColor = new Color(0.2, 0.2, 0.2, 1)
+
+//     // $scene.setupGrid(10, 10)
+//     $scene
+//       .getSettings()
+//       .getParameter('BackgroundColor')
+//       .setValue(new Color(0.85, 0.85, 0.85, 1))
+//     renderer.setScene($scene)
+
+//     const appData = {}
+
+//     appData.renderer = renderer
+//     appData.scene = $scene
+
+//     $assets = new TreeItem('Assets')
+//     appData.assets = $assets
+
+//     $scene.getRoot().addChild($assets)
+
+//     /** UNDO START */
+//     const undoRedoManager = UndoRedoManager.getInstance()
+//     appData.undoRedoManager = undoRedoManager
+//     /** UNDO END */
+
+//     /** SELECTION START */
+//     const cameraManipulator = renderer.getViewport().getManipulator()
+//     cameraManipulator.setDefaultManipulationMode(
+//       CameraManipulator.MANIPULATION_MODES.tumbler
+//     )
+//     appData.cameraManipulator = cameraManipulator
+//     const toolManager = new ToolManager(appData)
+//     $selectionManager = new SelectionManager(appData, {
+//       enableXfoHandles: true,
+//     })
+
+//     // Users can enable the handles usinga menu or hotkey.
+//     $selectionManager.showHandles(false)
+
+//     appData.selectionManager = $selectionManager
+
+//     const selectionTool = new SelectionTool(appData)
+//     selectionTool.setSelectionFilter(filterItemSelection)
+//     toolManager.registerTool('SelectionTool', selectionTool)
+//     toolManager.registerTool('CameraManipulator', cameraManipulator)
+
+//     renderer.getViewport().setManipulator(toolManager)
+//     toolManager.pushTool('CameraManipulator')
+//     appData.toolManager = toolManager
+
+  
   const onKeyDown = (event) => {
     if (!isMouseOver) return
 
@@ -134,19 +199,192 @@
       })
     })
   }
+
+  const resizableGrid = (table) => {
+  var row = table.getElementsByTagName('tr')[0],
+    cols = row ? row.children : undefined;
+  if (!cols) return;
+
+  table.style.overflow = 'hidden';
+
+  var tableHeight = table.offsetHeight;
+
+  for (var i = 0; i < cols.length; i++) {
+    var div = createDiv(tableHeight);
+    cols[i].appendChild(div);
+    cols[i].style.position = 'relative';
+    setListeners(div);
+  }
+
+  const setListeners = (div) => {
+    var pageX, curCol, nxtCol, curColWidth, nxtColWidth, tableWidth;
+
+    div.addEventListener('mousedown', function(e) { 
+    
+    	tableWidth = document.getElementById('tableId').offsetWidth;
+      curCol = e.target.parentElement;
+      nxtCol = curCol.nextElementSibling;
+      pageX = e.pageX;
+
+      var padding = paddingDiff(curCol);
+
+      curColWidth = curCol.offsetWidth - padding;
+    //  if (nxtCol)
+        //nxtColWidth = nxtCol.offsetWidth - padding;
+    });
+
+    div.addEventListener('mouseover', function(e) {
+      e.target.style.borderRight = '2px solid #0000ff';
+    })
+
+    div.addEventListener('mouseout', function(e) {
+      e.target.style.borderRight = '';
+    })
+
+    document.addEventListener('mousemove', function(e) {
+      if (curCol) {
+        var diffX = e.pageX - pageX;
+
+       // if (nxtCol)
+          //nxtCol.style.width = (nxtColWidth - (diffX)) + 'px';
+
+        curCol.style.width = (curColWidth + diffX) + 'px'; 
+        document.getElementById('tableId').style.width = tableWidth + diffX + "px"
+      }
+    });
+
+    document.addEventListener('mouseup', function(e) {
+      curCol = undefined;
+      nxtCol = undefined;
+      pageX = undefined;
+      nxtColWidth = undefined;
+      curColWidth = undefined
+    });
+  }
+
+  const createDiv = (height) => {
+    var div = document.createElement('div');
+    div.style.top = 0;
+    div.style.right = 0;
+    div.style.width = '5px';
+    div.style.position = 'absolute';
+    div.style.cursor = 'col-resize';
+    div.style.userSelect = 'none';
+    div.style.height = height + 'px';
+    return div;
+  }
+
+  const paddingDiff = (col) => {
+
+    if (getStyleVal(col, 'box-sizing') == 'border-box') {
+      return 0;
+    }
+
+    var padLeft = getStyleVal(col, 'padding-left');
+    var padRight = getStyleVal(col, 'padding-right');
+    return (parseInt(padLeft) + parseInt(padRight));
+
+  }
+
+  const getStyleVal = (elm, css) => {
+    return (window.getComputedStyle(elm, null).getPropertyValue(css))
+  }
+};
+//var tables = document.getElementsByClassName('flexiCol');
+var tables = document.getElementsByClassName('resizable');
+for (var i = 0; i < tables.length; i++) {
+  resizableGrid(tables[i]);
+}
 </script>
 
 <style>
-  *{box-sizing: border-box;}
+  /* *{box-sizing: border-box;}
   table{border-collapse:collapse;}
   th{padding:5px 15px;text-align:left;}
-  table,tr, th{border:1px solid #000;}
+  table,th{border:1px solid #000;} */
+  * {
+  box-sizing: border-box;
+}
+table {
+  min-width: 100vw;
+  width: auto;
+  -webkit-box-flex: 1;
+          flex: 1;
+  display: grid;
+  border-collapse: collapse;
+  grid-template-columns: 
+    minmax(150px, 1fr)
+    minmax(150px, 1.67fr)
+    minmax(150px, 1.67fr)
+    minmax(150px, 1.67fr)
+    minmax(150px, 3.33fr)
+    minmax(150px, 1.67fr)
+    minmax(150px, 3.33fr)
+    minmax(150px, 1.67fr);
+}
+
+thead,
+tbody,
+tr {
+  display: contents;
+}
+
+th{
+  padding: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+th {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  background: #5cb85c;
+  text-align: left;
+  font-weight: normal;
+  font-size: 1.1rem;
+  color: white;
+  position: relative;
+}
+
+th:last-child {
+  border: 0;
+}
+
+.resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: black;
+  opacity: 0;
+  width: 3px;
+  cursor: col-resize;
+}
+
+.resize-handle:hover,
+.header--being-resized .resize-handle {
+  opacity: 0.5;
+}
+
+th:hover .resize-handle {
+  opacity: 0.3;
+}
+
+td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  color: #808080;
+}
+
+tr:nth-child(even) td {
+  background: #f8f6ff;
+}
 </style>
 
-
-<table id="tableId" border="1"> 
+<table id="tableId" border="1" class="resizable"> 
   
-    
 <div bind:this={treeEl} class="TreeView min-w-max noselect">
   <thead>
     <tr>
@@ -157,18 +395,18 @@
     </tr>
   </thead>
   
+
+  <tbody> 
   {#each rootTreeItems as item, i}
-  
-  <!-- <tbody>  -->
   <TreeViewItem
       {item}
       {selectionManager}
       {undoRedoManager}
       bind:this={childComponents[i]}
-    />
-     
-<!-- </tbody>   -->
+    />     
   {/each}   
+</tbody>  
+
 </div>
 
 </table> 
