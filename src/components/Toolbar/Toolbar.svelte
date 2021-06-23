@@ -13,9 +13,8 @@
   import IconPerspView from '../icons/IconPerspView.svelte'
   import IconRenderModeWireframe from '../icons/IconRenderModeWireframe.svelte'
   import IconRenderModeFlat from '../icons/IconRenderModeFlat.svelte'
-  import IconRenderModeFlatWhite from '../icons/IconRenderModeFlat.svelte'
-  //TO REPLACE BY FLAT WHITE
-  import IconRenderModeShaded from '../icons/IconRenderModeShaded.svelte' 
+  import IconRenderModeFlatWhite from '../icons/IconRenderModeFlatWhite.svelte'
+  import IconRenderModeShaded from '../icons/IconRenderModeShaded.svelte'
   import IconRenderModeShadedAndEdges from '../icons/IconRenderModeShadedAndEdges.svelte'
   import IconRenderModePBR from '../icons/IconRenderModePBR.svelte'
   import IconRenderModeHiddenLine from '../icons/IconRenderModeHiddenLine.svelte'
@@ -34,6 +33,7 @@
     Color,
     Quat,
     MathFunctions,
+    Material,
   } = window.zeaEngine
 
   const setCameraXfo = (camera, dir, up, duration = 400) => {
@@ -208,45 +208,28 @@
     })
   }
   const handleChangeRenderModeFlatWhite = () => {
-   if (mode == RENDER_MODES.FLAT_WHITE) {
+    if (mode == RENDER_MODES.FLAT_WHITE) {
       return
     }
     mode = RENDER_MODES.FLAT_WHITE
-
     const { assets, scene, renderer } = $APP_DATA
-
     renderer.outlineThickness = 1
     renderer.outlineColor = new Color(0.2, 0.2, 0.2, 1)
-
-    
     const backgroundColor = scene
-                                .getSettings()
-                                .getParameter('BackgroundColor')
-                                .getValue()
-                                
+      .getSettings()
+      .getParameter('BackgroundColor')
+      .getValue()
+    const whiteMaterial = new Material()
+    whiteMaterial.setShaderName('FlatSurfaceShader')
+    whiteMaterial.getParameter('BaseColor').setValue(backgroundColor)
+
     assets.traverse((item) => {
       if (item instanceof GeomItem) {
         const geom = item.getParameter('Geometry').getValue()
         if (geom instanceof Mesh || geom instanceof MeshProxy) {
           item.getParameter('Visible').setValue(true)
+          item.getParameter('Material').setValue(whiteMaterial)
         }
-        createAndAssignMaterial(
-          item,
-          RENDER_MODES.FLAT_WHITE,
-          (newMaterial) =>{
-          // Assign the white material to all MEsh geoms.
-          item.getParameter('Material').setValue(newMaterial)
-          newMaterial.setName('FlatWhite')
-          
-          if (newMaterial.getShaderName() == 'LinesShader') {
-            if (newMaterial.hasParameter('OccludedStippleValue')) {
-              newMaterial.getParameter('OccludedStippleValue').setValue(1)
-            }
-          } else {
-            newMaterial.setShaderName('FlatSurfaceShader')
-          }
-          newMaterial.getParameter('BaseColor').setValue(backgroundColor)
-        })
       }
     })
     mode = RENDER_MODES.FLAT_WHITE
@@ -272,10 +255,7 @@
         if (geom instanceof Mesh || geom instanceof MeshProxy) {
           item.getParameter('Visible').setValue(true)
         }
-        createAndAssignMaterial(
-          item,
-          RENDER_MODES.FLAT,
-          (newMaterial) => {
+        createAndAssignMaterial(item, RENDER_MODES.FLAT, (newMaterial) => {
           newMaterial.setName('Flat')
           const shaderName = newMaterial.getShaderName()
           if (shaderName == 'LinesShader') {
