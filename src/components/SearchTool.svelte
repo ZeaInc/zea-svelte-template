@@ -4,7 +4,6 @@
   import { scene } from '../stores/scene.js'
 
   const { Color, Material, TreeItem, GeomItem, GridTreeItem } = window.zeaEngine
-
   let searchInputEl
   let searchResultsEl
   let value = ''
@@ -27,6 +26,7 @@
       }
       filteredItemsSet.forEach((item) => {
         if (item instanceof GeomItem) {
+          console.log("GeoItem", item)
           // Updating the search.
           // Put back the original materials
           if (filteredItemMaterials[item.getId()]) {
@@ -46,13 +46,29 @@
         $scene.getRoot().traverse((item) => {
           if (item instanceof GridTreeItem || !(item instanceof TreeItem))
             return false
-          if (re.test(item.getName())) {
-            const listItem = document.createElement('li')
-            listItem.classList.add('truncate')
-            listItem.textContent = item.getName()
-            searchResultsEl.appendChild(listItem)
+          if (re.test(item.getName())) { 
+            console.log("GridTreeItem ou TreeItem", item)
+
+            // const listItem = document.createElement('li')
+            // listItem.classList.add('truncate')
+            // listItem.textContent = item.getName()
+            // searchResultsEl.appendChild(listItem)
             matchedItemsSet.add(item)
             item.addHighlight('searchResult', matchColor, true)
+            
+            let itemRev = item.getParameter('Rev')
+            if (itemRev){
+              let itemRevValue = itemRev.getValue()
+              matchedItemsSet.add(itemRevValue)
+              itemRevValue.addHighlight('searchResult', matchColor, true)
+            }
+            let itemDescription = item.getParameter('Description')
+            if (itemDescription){
+              let itemDescriptionValue = itemDescription.getValue()
+              matchedItemsSet.add(itemDescriptionValue)
+              itemDescriptionValue.addHighlight('searchResult', matchColor, true)
+            }
+
             return false
           } else if (item instanceof GeomItem) {
             filteredItemsSet.add(item)

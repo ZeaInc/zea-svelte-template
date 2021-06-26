@@ -1,7 +1,8 @@
 <script>
   import { beforeUpdate } from 'svelte'
   import TreeViewItem from './TreeViewItem.svelte'
-
+  import SearchTool from '../components/SearchTool.svelte'
+  
   let treeEl
   export let rootTreeItems
   export let selectionManager = null
@@ -382,6 +383,10 @@ tr:nth-child(even) td {
   background: #f8f6ff;
 }
 </style>
+
+<div>
+  <SearchTool />
+</div>
 
 <table id="tableId" border="1" class="resizable"> 
   
