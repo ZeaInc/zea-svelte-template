@@ -26,7 +26,6 @@
       }
       filteredItemsSet.forEach((item) => {
         if (item instanceof GeomItem) {
-          console.log("GeoItem", item)
           // Updating the search.
           // Put back the original materials
           if (filteredItemMaterials[item.getId()]) {
@@ -46,9 +45,7 @@
         $scene.getRoot().traverse((item) => {
           if (item instanceof GridTreeItem || !(item instanceof TreeItem))
             return false
-          if (re.test(item.getName())) { 
-            console.log("GridTreeItem ou TreeItem", item)
-
+          if (re.test(item.getName())) {
             // const listItem = document.createElement('li')
             // listItem.classList.add('truncate')
             // listItem.textContent = item.getName()

@@ -170,16 +170,52 @@
       expandPath = null
     }
   })
+
+  const reSizeGrid = (event) => {
+    var thElm
+    var startOffset
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll("td"),
+      function (th) {
+        th.style.position = 'relative'
+
+        var grip = document.createElement('div')
+        grip.innerHTML = "&nbsp"
+        grip.style.top = 0
+        grip.style.right = 0
+        grip.style.bottom = 0
+        grip.style.width = '5px'
+        grip.style.position = 'absolute'
+        grip.style.cursor = 'col-resize'
+        grip.addEventListener('mousedown', function (e) {
+            thElm = th
+            startOffset = th.offsetWidth - e.pageX
+        })
+
+        th.appendChild(grip)
+      })
+    
+      document.addEventListener('mousemove', function (e) {
+      if (thElm) {
+        thElm.style.width = startOffset + e.pageX + 'px'
+        console.log("ok")
+      }
+    })
+
+    document.addEventListener('mouseup', function () {
+        thElm = undefined
+    })
+  }
+  document.addEventListener('mouseenter', reSizeGrid)
 </script>
+
 <style>
-  /* th, td{padding:5px 15px;text-align:left;} */
-  td {
-  padding: 15px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: black;
 }
-  
 </style>
 
 {#if item}
