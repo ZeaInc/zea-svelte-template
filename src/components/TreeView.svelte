@@ -238,7 +238,7 @@
         thElm = undefined
     })
   }
-  document.addEventListener('mouseenter', reSizeGrid)
+  // document.addEventListener('mouseenter', reSizeGrid)
 </script>
 
 
@@ -261,6 +261,11 @@ table th {
     border-color: black;
     background-color: green;
 }
+table td {
+    border-width: 1px;
+    border-style: solid;
+    border-color: black;
+}
 </style>
 <table id="tableId" border="1" class="resizable">   
   <div bind:this={treeEl} class="TreeView min-w-max noselect">
@@ -274,16 +279,16 @@ table th {
     </thead>
     
 
-    <tbody> 
-    {#each rootTreeItems as item, i}
-    <TreeViewItem
-        {item}
-        {selectionManager}
-        {undoRedoManager}
-        bind:this={childComponents[i]}
-      />     
-    {/each}   
-  </tbody>  
+    <tbody>
+      {#each rootTreeItems as item, i}
+        <TreeViewItem
+          {item}
+          {selectionManager}
+          {undoRedoManager}
+          bind:this={childComponents[i]}
+        />  
+      {/each}
+    </tbody>  
 
   </div>
 </table> 

@@ -6,7 +6,7 @@
   import { assets } from '../stores/assets.js'
   import { selectionManager } from '../stores/selectionManager.js'
 
-  const tabs = ['Assembly', 'Search']
+  const tabs = ['Assembly']//, 'Search']
 
   let selectedTab
 
