@@ -7,7 +7,7 @@
   import { selectionManager } from '../stores/selectionManager.js'
   import { APP_DATA } from '../stores/appData'
 
-  const tabs = ['Assembly', 'Search']
+  const tabs = ['Assembly']//, 'Search']
 
   let selectedTab
 

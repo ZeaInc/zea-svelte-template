@@ -47,10 +47,10 @@
           if (item instanceof GridTreeItem || !(item instanceof TreeItem))
             return false
           if (re.test(item.getName())) {
-            const listItem = document.createElement('li')
-            listItem.classList.add('truncate')
-            listItem.textContent = item.getName()
-            searchResultsEl.appendChild(listItem)
+            // const listItem = document.createElement('li')
+            // listItem.classList.add('truncate')
+            // listItem.textContent = item.getName()
+            // searchResultsEl.appendChild(listItem)
             matchedItemsSet.add(item)
             item.addHighlight('searchResult', matchColor, true)
             return false

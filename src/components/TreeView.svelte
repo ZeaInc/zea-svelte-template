@@ -1,6 +1,7 @@
 <script>
   import { beforeUpdate } from 'svelte'
   import TreeViewItem from './TreeViewItem.svelte'
+  import SearchTool from '../components/SearchTool.svelte'
 
   let treeEl
   export let rootTreeItems
@@ -135,6 +136,10 @@
     })
   }
 </script>
+
+<div>
+  <SearchTool />
+</div>
 
 <div bind:this={treeEl} class="TreeView min-w-max noselect">
   {#each rootTreeItems as item, i}
