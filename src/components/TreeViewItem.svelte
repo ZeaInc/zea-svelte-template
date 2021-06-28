@@ -287,16 +287,22 @@ td {
     </div>
     
     {#if item.getParameter('Rev')} 
-      <td
-      class="flex-1 border rounded px-1"
-            style="background-color: {highlighted
-              ? highlightBgColor
-              : 'transparent'}; border-color: {highlighted
-              ? highlightColor
-              : 'transparent'};"
-      > {item.getParameter('Rev').getValue()} </td> 
+      <td>
+        <span
+        class="flex-1 border rounded px-1"
+              style="background-color: {highlighted
+                ? highlightBgColor
+                : 'transparent'}; border-color: {highlighted
+                ? highlightColor
+                : 'transparent'};"
+        > 
+          {item.getParameter('Rev').getValue()} 
+        </span> 
+      </td>
     {:else}
-      <td> - </td> 
+      <td>
+        <span> - </span> 
+      </td>
     {/if}
     
     {#if item.getParameter('Description')} 
@@ -310,10 +316,12 @@ td {
             : 'transparent'};"
         >
           {item.getParameter('Description').getValue()} 
-            </span>
+        </span>
       </td>
     {:else}
-      <td> - </td> 
+      <td>
+        <span> - </span> 
+      </td>
     {/if}
 
     <td>
