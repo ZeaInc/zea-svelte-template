@@ -134,15 +134,82 @@
       })
     })
   }
+  
+  const reSizeGrid = (event) => {
+    var thElm
+    var startOffset
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll("table th"),
+      function (th) {
+        th.style.position = 'relative'
+
+        var grip = document.createElement('div')
+        grip.innerHTML = "&nbsp"
+        grip.style.top = 0
+        grip.style.right = 0
+        grip.style.bottom = 0
+        grip.style.width = '5px'
+        grip.style.position = 'absolute'
+        grip.style.cursor = 'col-resize'
+        grip.addEventListener('mousedown', function (e) {
+            thElm = th
+            startOffset = th.offsetWidth - e.pageX
+        })
+
+        th.appendChild(grip)
+      })
+    
+      document.addEventListener('mousemove', function (e) {
+      if (thElm) {
+        thElm.style.width = startOffset + e.pageX + 'px'
+        console.log("ok")
+      }
+    })
+
+    document.addEventListener('mouseup', function () {
+        thElm = undefined
+    })
+  }
+  document.addEventListener('mousemove', reSizeGrid)
 </script>
 
-<div bind:this={treeEl} class="TreeView min-w-max noselect">
-  {#each rootTreeItems as item, i}
-    <TreeViewItem
-      {item}
-      {selectionManager}
-      {undoRedoManager}
-      bind:this={childComponents[i]}
-    />
-  {/each}
-</div>
+<style>
+  table {
+    border-width: 1px;
+    border-style: solid;
+    border-color: black;
+    border-collapse: collapse;
+}
+table th {
+    border-width: 1px;
+    border-style: solid;
+    border-color: black;
+    background-color: green;
+}
+</style>
+
+<table id="tableId" border="1" class="resizable">   
+  <div bind:this={treeEl} class="TreeView min-w-max noselect">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Rev</th>
+        <th>Description</th>
+        <th>Model Name</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {#each rootTreeItems as item, i}
+        <TreeViewItem
+          {item}
+          {selectionManager}
+          {undoRedoManager}
+          bind:this={childComponents[i]}
+        />  
+      {/each}
+    </tbody>  
+
+  </div>
+</table> 
