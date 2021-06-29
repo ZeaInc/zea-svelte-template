@@ -1,5 +1,4 @@
 <script>
-  import { onMount } from 'svelte'
   export let orientation = 'horizontal'
 
   import ToolbarItem from './ToolbarItem.svelte'
@@ -14,7 +13,6 @@
   import IconPerspView from '../icons/IconPerspView.svelte'
   import IconRenderModeWireframe from '../icons/IconRenderModeWireframe.svelte'
   import IconRenderModeFlat from '../icons/IconRenderModeFlat.svelte'
-  import IconRenderModeFlatWhite from '../icons/IconRenderModeFlatWhite.svelte'
   import IconRenderModeShaded from '../icons/IconRenderModeShaded.svelte'
   import IconRenderModeShadedAndEdges from '../icons/IconRenderModeShadedAndEdges.svelte'
   import IconRenderModePBR from '../icons/IconRenderModePBR.svelte'
@@ -34,7 +32,6 @@
     Color,
     Quat,
     MathFunctions,
-    Material,
   } = window.zeaEngine
 
   const setCameraXfo = (camera, dir, up, duration = 400) => {
@@ -148,7 +145,6 @@
   const RENDER_MODES = {
     WIREFRAME: Symbol(),
     FLAT: Symbol(),
-    FLAT_WHITE: Symbol(),
     HIDDEN_LINE: Symbol(),
     SHADED: Symbol(),
     SHADED_AND_EDGES: Symbol(),
@@ -167,10 +163,18 @@
   // geomItem at load time.
   const geomItemToMaterialMapping = {}
   const createAndAssignMaterial = (geomItem, mode, cb) => {
-    if (mode != RENDER_MODES.PBR) {
-      cacheMaterial(geomItem)
-    }
     const geomItemId = geomItem.getId()
+    if (mode != RENDER_MODES.PBR) {
+      const material = geomItem.getParameter('Material').getValue()
+      const materialId = material.getId()
+      if (!geomItemToMaterialMapping[geomItemId]) {
+        geomItemToMaterialMapping[geomItemId] = materialId
+      }
+      if (!materials[materialId]) {
+        materials[materialId] = {}
+        materials[materialId][RENDER_MODES.PBR] = material
+      }
+    }
     const materialId = geomItemToMaterialMapping[geomItemId]
     if (!materials[materialId][mode]) {
       // Clone the PBR material and use it as a basis for the new material.
@@ -181,27 +185,13 @@
     const result = materials[materialId][mode]
     geomItem.getParameter('Material').setValue(result)
   }
-  const cacheMaterial = (geomItem)=>{
-    const geomItemId = geomItem.getId()
-    const material = geomItem.getParameter('Material').getValue()
-    const materialId = material.getId()
-    if (!geomItemToMaterialMapping[geomItemId]) {
-      geomItemToMaterialMapping[geomItemId] = materialId
-    }
-    if (!materials[materialId]) {
-      materials[materialId] = {}
-      materials[materialId][RENDER_MODES.PBR] = material
-    }
-  }
-
-
-  const handleChangeRenderModeWireframe = (pub=true) => {
+  const handleChangeRenderModeWireframe = () => {
     if (mode == RENDER_MODES.WIREFRAME) {
       return
     }
     mode = RENDER_MODES.WIREFRAME
 
-    const { assets, session } = $APP_DATA
+    const { assets } = $APP_DATA
     assets.traverse((item) => {
       if (item instanceof GeomItem) {
         const geom = item.getParameter('Geometry').getValue()
@@ -213,44 +203,14 @@
         })
       }
     })
-    if (pub && session) session.pub('setRenderMode', { mode: 'WIREFRAME' })
   }
-  const handleChangeRenderModeFlatWhite = (pub=true) => {
-    if (mode == RENDER_MODES.FLAT_WHITE) {
-      return
-    }
-    mode = RENDER_MODES.FLAT_WHITE
-    const { assets, scene, renderer, session } = $APP_DATA
-    renderer.outlineThickness = 1
-    renderer.outlineColor = new Color(0.2, 0.2, 0.2, 1)
-    const backgroundColor = scene
-      .getSettings()
-      .getParameter('BackgroundColor')
-      .getValue()
-    const whiteMaterial = new Material()
-    whiteMaterial.setShaderName('FlatSurfaceShader')
-    whiteMaterial.getParameter('BaseColor').setValue(backgroundColor)
-
-    assets.traverse((item) => {
-      if (item instanceof GeomItem) {
-        const geom = item.getParameter('Geometry').getValue()
-        if (geom instanceof Mesh || geom instanceof MeshProxy) {
-          cacheMaterial(item)
-          item.getParameter('Visible').setValue(true)
-          item.getParameter('Material').setValue(whiteMaterial)
-        }
-      }
-    })
-    mode = RENDER_MODES.FLAT_WHITE
-    if (pub && session) session.pub('setRenderMode', { mode: 'FLAT_WHITE' })
-  }
-  const handleChangeRenderModeFlat = (pub=true) => {
+  const handleChangeRenderModeFlat = () => {
     if (mode == RENDER_MODES.FLAT) {
       return
     }
     mode = RENDER_MODES.FLAT
 
-    const { assets, scene, renderer, session } = $APP_DATA
+    const { assets, scene, renderer } = $APP_DATA
 
     renderer.outlineThickness = 1
     renderer.outlineColor = new Color(0.2, 0.2, 0.2, 1)
@@ -284,16 +244,14 @@
       }
     })
     mode = RENDER_MODES.FLAT
-    if (pub && session) session.pub('setRenderMode', { mode: 'FLAT' })
   }
-
-  const handleChangeRenderModeHiddenLine = (pub=true) => {
+  const handleChangeRenderModeHiddenLine = () => {
     if (mode == RENDER_MODES.HIDDEN_LINE) {
       return
     }
     mode = RENDER_MODES.HIDDEN_LINE
 
-    const { assets, renderer, session } = $APP_DATA
+    const { assets, renderer } = $APP_DATA
 
     renderer.outlineThickness = 1
     renderer.outlineColor = new Color(0.2, 0.2, 0.2, 1)
@@ -314,13 +272,10 @@
               if (newMaterial.hasParameter('OccludedStippleValue')) {
                 newMaterial.getParameter('StippleScale').setValue(0.02)
                 newMaterial.getParameter('StippleValue').setValue(0)
-                newMaterial.getParameter('OccludedStippleValue').setValue(1)
+                newMaterial.getParameter('OccludedStippleValue').setValue(0.6)
               }
             } else {
               newMaterial.setShaderName('FlatSurfaceShader')
-              const color = newMaterial.getParameter('BaseColor').getValue().clone()
-              color.a = 0.6
-              newMaterial.getParameter('BaseColor').setValue(color)
               // newMaterial.getParameter('BaseColor').setValue(backgroundColor)
             }
           }
@@ -328,15 +283,13 @@
       }
     })
     mode = RENDER_MODES.HIDDEN_LINE
-    if (pub && session) session.pub('setRenderMode', { mode: 'HIDDEN_LINE' })
   }
-
-  const handleChangeRenderModeShadedAndEdges = (pub=true) => {
+  const handleChangeRenderModeShadedAndEdges = () => {
     if (mode == RENDER_MODES.SHADED_AND_EDGES) {
       return
     }
 
-    const { assets, renderer, session } = $APP_DATA
+    const { assets, renderer } = $APP_DATA
 
     renderer.outlineThickness = 1
     renderer.outlineColor = new Color(0.2, 0.2, 0.2, 1)
@@ -368,14 +321,12 @@
       }
     })
     mode = RENDER_MODES.SHADED_AND_EDGES
-    if (pub && session) session.pub('setRenderMode', { mode: 'SHADED_AND_EDGES' })
   }
-  
-  const handleChangeRenderModePBR = (pub=true) => {
+  const handleChangeRenderModePBR = () => {
     if (mode == RENDER_MODES.PBR) {
       return
     }
-    const { assets, renderer, session } = $APP_DATA
+    const { assets, renderer } = $APP_DATA
 
     renderer.outlineThickness = 1
     renderer.outlineColor = new Color(0.2, 0.2, 0.2, 1)
@@ -393,42 +344,7 @@
       }
     })
     mode = RENDER_MODES.PBR
-    if (pub && session) session.pub('setRenderMode', { mode: 'PBR' })
   }
-
-  let bound = false
-  onMount(async () => {
-    APP_DATA.subscribe((appData) => {
-      if (!appData || bound) 
-        return
-      const { session } = appData
-      if (session) {
-        session.sub('setRenderMode', (data) => {
-          switch (data.mode) {
-          case 'WIREFRAME': 
-            handleChangeRenderModeWireframe(false)
-            break
-          case 'FLAT': 
-            handleChangeRenderModeFlat(false)
-            break
-          case 'FLAT_WHITE': 
-            handleChangeRenderModeFlatWhite(false)
-            break
-          case 'HIDDEN_LINE': 
-            handleChangeRenderModeHiddenLine(false)
-            break
-          case 'SHADED_AND_EDGES': 
-            handleChangeRenderModeShadedAndEdges(false)
-            break
-          case 'PBR': 
-            handleChangeRenderModePBR(false)
-            break
-          }
-        })
-      }
-      bound = true
-    })
-  })
 </script>
 
 <div class="Toolbar flex gap-1" class:flex-col={orientation === 'vertical'}>
@@ -474,13 +390,6 @@
         on:click={handleChangeRenderModeFlat}
       >
         <IconRenderModeFlat />
-      </ToolbarItem>
-      <ToolbarItem
-        isHighlighted={mode === RENDER_MODES.FLAT_WHITE}
-        title="FlatWhite"
-        on:click={handleChangeRenderModeFlatWhite}
-      >
-        <IconRenderModeFlatWhite />
       </ToolbarItem>
       <ToolbarItem
         isHighlighted={mode === RENDER_MODES.HIDDEN_LINE}

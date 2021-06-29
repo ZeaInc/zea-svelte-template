@@ -5,7 +5,6 @@
 
   import { assets } from '../stores/assets.js'
   import { selectionManager } from '../stores/selectionManager.js'
-  import { APP_DATA } from '../stores/appData'
 
   const tabs = ['Assembly', 'Search']
 
@@ -37,7 +36,6 @@
         rootTreeItems={treeItems}
         {isMouseOver}
         selectionManager={$selectionManager}
-        undoRedoManager={$APP_DATA && $APP_DATA.undoRedoManager}
       />
     </div>
 

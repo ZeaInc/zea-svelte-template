@@ -14,14 +14,9 @@ This template has been deployed as a live demo for you to check out now.
 You can change the password in your own deployments, or connect to an authentication service.
 See below.
 
+https://svelte-template.zea.live/
 
-
-https://svelte-template.zea.live/?zcad=data/gear_box_final_asm.zcad
-
-https://svelte-template.zea.live/?zcad=data/Fidget-Spinner-2.zcad
-
-https://svelte-template.zea.live/?zcad=data/HC_SRO4.zcad
-
+The default asset provided is the GearBox.
 ![GearBox](docs/images/GearBox.jpg)
 
 You can also modify the app to load parts of the hospital.
@@ -96,8 +91,7 @@ The template leverages the Zea UX library to provide Undo, Redo and tools such a
 
 ## User Identification and Authentication
 
-This template app comes with a simple user identification and authentication system. Users enter their name and a password to gain access to the app.
-This authentication system cen be replaced with a robust solution like Auth0 or removed completely for public demos.
+This template app comes with a simple user identification and authentication system. Users enter their name and an optional password to gain access to the app.
 
 ```javascript
 onMount(async () => {
@@ -114,18 +108,22 @@ The Authentication can be disabled by commenting out the $redirect('/login') lin
 
 ## Collaboration
 
-This Template comes with Collab integrated as an example of how to build collaborative applications. 
-Changes such as item selection and item visibility are synchronized to other users. 
+If a user is identified, then the app integrates the powerful collaboration framework refrred to as 'Collab.
 
 > https://docs.zea.live/zea-collab/
 
 ```javascript
-   const roomId = urlParams.get('roomId')
-   const session = new Session(userData, SOCKET_URL)
-   if (roomId) session.joinRoom(roomId)
+const SOCKET_URL = 'https://websocket-staging.zea.live'
+const ROOM_ID = 'zea-template-collab'
 ```
 
-> Note: the roomId is what defines whether users of a given app are visible to each other. Apps can use any value as a room id, or ask fro an explicit value as we do in this sample.
+> Note: the ROOM_ID is what defines whether users of a given app are visible to each other. Always customize this value to avoid collisions with other apps.
+
+```javascript
+const session = new Session(userData, SOCKET_URL)
+session.joinRoom(ROOM_ID)
+const sessionSync = new SessionSync(session, appData, userData, {})
+```
 
 ## CAD
 
@@ -134,26 +132,15 @@ the Zea CAD library comes pre-integrated and a sample zcad file is loaded.
 > https://docs.zea.live/zea-cad/
 
 ```javascript
-   const asset = new CADAsset()
-   asset.load(url).then(() => {
-   renderer.frameAll()
-   })
+const asset = new CADAsset()
+asset.on('loaded', () => {
+  renderer.frameAll()
+})
+scene.getRoot().addChild(asset)
+asset.getParameter('FilePath').setValue('/data/HC_SRO4.zcad')
 ```
 
-Note: The zcad file format is a proprietary CAD file format. Zea Cloud can be used to produce zcad files, or the CLI tools available on request.
-
-## glTF
-
-The gltf-loader plugin is integrated, providing support for loading GLTF files into this app.
-
-```javascript
-   const asset = new GLTFAsset('gltf')
-   asset.load(url, filename).then(() => {
-   renderer.frameAll()
-   })
-```
-
-
+The code above loads the sample cad file.
 
 # Installing your own plugins
 

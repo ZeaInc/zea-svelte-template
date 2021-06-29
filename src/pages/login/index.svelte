@@ -46,10 +46,11 @@
       kvp[kvp.length] = [key, value].join('=')
     }
 
-    const params = kvp.length > 1 ? kvp.join('&') : kvp[0]
+    // can return this or...
+    const params = kvp.join('&')
 
     // reload page with new params
-    $redirect('/?' + params)
+    document.location.search = params
   }
 
   const redirectToMain = () => {
@@ -75,6 +76,7 @@
       submitted = true
       //Note: this causes a reload of the page.
       insertParam('roomId', formFields.roomId)
+      redirectToMain()
     } catch (err) {
       authError = err
     }
@@ -107,7 +109,7 @@
   >
     <div class="max-w-md w-full space-y-8">
       <h2 class="mt-6 text-center text-3xl font-extrabold">Zea Svelte Template</h2>
-      <p class="mt-6 text-center">This is an MIT open sourced template application that can be used to build your own custom applications.</p>
+      <p class="mt-6 text-center">This is an MIT open sourced template application that can used to build your own custom applications.</p>
 
       <form
         class="mt-8 space-y-6"
