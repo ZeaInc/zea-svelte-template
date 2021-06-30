@@ -39,7 +39,7 @@
     CameraManipulator,
   } = window.zeaEngine
   const { CADAsset, CADBody } = window.zeaCad
-  const { SelectionManager, UndoRedoManager, ToolManager, SelectionTool } =
+  const { SelectionManager, UndoRedoManager, ToolManager, SelectionTool, VRHoldObjectsTool } =
     window.zeaUx
 
   const { Session, SessionSync } = window.zeaCollab
@@ -324,6 +324,31 @@
     }
     /** COLLAB END */
 
+    /** VR START*/
+    renderer
+      .getXRViewport()
+      .then((xrViewport) => {
+        // The default manipulator is the VRViewManipulator, so grab that.
+        const viewManipulator = xrViewport.getManipulator()
+        const holdObjectsTool = new VRHoldObjectsTool(appData)
+
+        const vrToolManager = new ToolManager(appData)
+        // Register both tools.
+        vrToolManager.registerTool('VRHoldObjectsTool', holdObjectsTool)
+        vrToolManager.registerTool('VRViewManipulator', viewManipulator)
+
+        // We will stack the VRHoldObjectsTool on top of the VRViewManipulator
+        // this means that the VRHoldObjectsTool may operate, else the VRViewManipulator
+        xrViewport.setManipulator(vrToolManager)
+        vrToolManager.pushTool('VRViewManipulator')
+        vrToolManager.pushTool('VRHoldObjectsTool')
+      })
+      .catch((reason) => {
+        console.warn('Unable to setup XR:' + reason)
+      })
+
+    /** VR END*/
+    
     /** EMBED MESSAGING START*/
     if (embeddedMode) {
       const client = createClient()
