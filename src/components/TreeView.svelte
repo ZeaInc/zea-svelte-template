@@ -1,7 +1,13 @@
 <script>
   import { beforeUpdate } from 'svelte'
   import TreeViewItem from './TreeViewItem.svelte'
-
+  let item = window.zeaEngine
+  
+  let highlightBgColor = TreeViewItem.highlightBgColor
+  let highlighted = TreeViewItem.highlighted
+  let highlightColor = TreeViewItem.highlightColor
+  let itemFromFile = item
+  
   let treeEl
   export let rootTreeItems
   export let selectionManager = null
@@ -171,8 +177,12 @@
         thElm = undefined
     })
   }
-  document.addEventListener('mousemove', reSizeGrid)
+    // document.addEventListener('mousemove', reSizeGrid)
 </script>
+
+<svelte:body
+  on:mousemove={reSizeGrid}
+/>
 
 <style>
   table {
@@ -180,13 +190,13 @@
     border-style: solid;
     border-color: black;
     border-collapse: collapse;
-}
-table th {
-    border-width: 1px;
-    border-style: solid;
-    border-color: black;
-    background-color: green;
-}
+  }
+  table th {
+      border-width: 1px;
+      border-style: solid;
+      border-color: black;
+      background-color: green;
+  }
 </style>
 
 <table id="tableId" border="1" class="resizable">   
@@ -207,9 +217,8 @@ table th {
           {selectionManager}
           {undoRedoManager}
           bind:this={childComponents[i]}
-        />  
-      {/each}
+        />
+      {/each} 
     </tbody>  
-
   </div>
 </table> 
