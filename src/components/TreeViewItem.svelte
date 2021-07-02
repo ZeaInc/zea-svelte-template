@@ -208,6 +208,8 @@
         thElm = undefined
     })
   }
+  // increments each time a child is generated
+  export let count = 0
 </script>
 
 <svelte:body
@@ -219,14 +221,16 @@
       border-style: solid;
       border-color: black;
   }
-  </style>
+</style>
+
 {#if item}
   <tr>
     <td>
       <div bind:this={el} class="TreeItem" class:text-gray-500={!visible}>
           <div
             class="TreeItem__header flex items-center cursor-default hover:bg-gray-800 transition-colors mb-1"
-          >
+            style="padding-left: {count*15}px;"
+            >
             {#if hasChildren}
               <button
                 class="cursor-default hover:bg-gray-700 rounded w-8 md:w-6"
@@ -322,6 +326,7 @@
     <!-- <div
       class="TreeItem__body ml-4 pl-4 md:ml-3 md:pl-3 border-dotted border-l-2 md:border-l"
     > -->
+    <!-- <div> -->
       {#if isTreeItem}
         {#each item.getChildren() as childItem, i}
           <svelte:self
@@ -329,6 +334,7 @@
             {selectionManager}
             {undoRedoManager}
             bind:this={childComponents[i]}
+            count="{count +1}"
           />
         {/each}
       {/if}

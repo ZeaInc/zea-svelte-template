@@ -1,13 +1,7 @@
 <script>
   import { beforeUpdate } from 'svelte'
   import TreeViewItem from './TreeViewItem.svelte'
-  let item = window.zeaEngine
-  
-  let highlightBgColor = TreeViewItem.highlightBgColor
-  let highlighted = TreeViewItem.highlighted
-  let highlightColor = TreeViewItem.highlightColor
-  let itemFromFile = item
-  
+
   let treeEl
   export let rootTreeItems
   export let selectionManager = null
