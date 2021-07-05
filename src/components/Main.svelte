@@ -114,7 +114,7 @@
     // Assigning an Environment Map enables PBR lighting for niceer shiny surfaces.
     if (!SystemDesc.isMobileDevice && SystemDesc.gpuDesc.supportsWebGL2) {
       const envMap = new EnvMap('envMap')
-      envMap.getParameter('FilePath').setValue('data/StudioG.zenv')
+      envMap.getParameter('FilePath').setValue('../../assets/data/StudioG.zenv')
       envMap.getParameter('HeadLightMode').setValue(true)
       $scene.getSettings().getParameter('EnvMap').setValue(envMap)
     }
