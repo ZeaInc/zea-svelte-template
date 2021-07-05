@@ -189,7 +189,7 @@
       border-width: 1px;
       border-style: solid;
       border-color: black;
-      background-color: green;
+      background-color: var(--color-treeview-columns);
   }
 </style>
 
