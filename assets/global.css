@@ -60,4 +60,5 @@ body,
   --color-background-2: rgba(114, 109, 109, 0.5);
   --color-foreground-1: rgb(254, 254, 255);
   --color-foreground-2: rgba(145, 138, 16, 0.8);
+  --color-treeview-columns: rgb(249, 206, 3)
 } 

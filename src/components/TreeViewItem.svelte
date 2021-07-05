@@ -5,6 +5,7 @@
   import IconEyeOff from '../components/icons/IconEyeOff.svelte'
   import IconChevronDown from '../components/icons/IconChevronDown.svelte'
   import IconChevronRight from '../components/icons/IconChevronRight.svelte'
+  import { children } from 'svelte/internal';
   const { CADBody } = window.zeaCad
   const { TreeItem, InstanceItem } = window.zeaEngine
 
@@ -170,69 +171,175 @@
       expandPath = null
     }
   })
+
+  const reSizeGrid = () => {
+    var thElm
+    var startOffset
+
+    Array.prototype.forEach.call(
+      document.querySelectorAll("td"),
+      function (th) {
+        th.style.position = 'relative'
+
+        var grip = document.createElement('div')
+        grip.innerHTML = "&nbsp"
+        grip.style.top = 0
+        grip.style.right = 0
+        grip.style.bottom = 0
+        grip.style.width = '5px'
+        grip.style.position = 'absolute'
+        grip.style.cursor = 'col-resize'
+        grip.addEventListener('mousedown', function (e) {
+            thElm = th
+            startOffset = th.offsetWidth - e.pageX
+        })
+
+        th.appendChild(grip)
+      })
+    
+      document.addEventListener('mousemove', function (e) {
+      if (thElm) {
+        thElm.style.width = startOffset + e.pageX + 'px'
+        console.log("ok")
+      }
+    })
+
+    document.addEventListener('mouseup', function () {
+        thElm = undefined
+    })
+  }
+  // increments each time a child is generated
+  export let count = 0
 </script>
 
+<svelte:body
+  on:mousemove={reSizeGrid}
+/>
+<style>
+  td {
+      border-width: 1px;
+      border-style: solid;
+      border-color: black;
+  }
+</style>
+
 {#if item}
-  <div bind:this={el} class="TreeItem" class:text-gray-500={!visible}>
-    <div
-      class="TreeItem__header flex items-center cursor-default hover:bg-gray-800 transition-colors mb-1"
-    >
-      {#if hasChildren}
-        <button
-          class="cursor-default hover:bg-gray-700 rounded w-8 md:w-6"
-          on:click={toggleIsExpanded}
-        >
-          {#if isExpanded}
-            <IconChevronDown />
-          {:else}
-            <IconChevronRight />
-          {/if}
-        </button>
+  <tr>
+    <td>
+      <div bind:this={el} class="TreeItem" class:text-gray-500={!visible}>
+          <div
+            class="TreeItem__header flex items-center cursor-default hover:bg-gray-800 transition-colors mb-1"
+            style="padding-left: {count*15}px;"
+            >
+            {#if hasChildren}
+              <button
+                class="cursor-default hover:bg-gray-700 rounded w-8 md:w-6"
+                on:click={toggleIsExpanded}
+              >
+                {#if isExpanded}
+                  <IconChevronDown />
+                {:else}
+                  <IconChevronRight />
+                {/if}
+              </button>
+            {:else}
+              <div class="w-8 md:w-6" />
+            {/if}
+
+            {#if isTreeItem}
+              <button
+                class="cursor-default hover:bg-gray-700 rounded p-1 w-8 md:w-6"
+                on:click={toggleVisibility}
+              >
+                {#if visible}
+                  <IconEye />
+                {:else}
+                  <IconEyeOff />
+                {/if}
+              </button>
+            {/if}
+          
+            <span
+              class="flex-1 border rounded px-1"
+              style="background-color: {highlighted
+                ? highlightBgColor
+                : 'transparent'}; border-color: {highlighted
+                ? highlightColor
+                : 'transparent'};"
+              on:click={handleItemClick}
+            >
+              {item.getName()}
+            </span>
+          </div>
+      </div>
+    </td>
+  
+    <td>
+      {#if item.getParameter('Rev')} 
+        <span
+        class="flex-1 border rounded px-1"
+              style="background-color: {highlighted
+                ? highlightBgColor
+                : 'transparent'}; border-color: {highlighted
+                ? highlightColor
+                : 'transparent'};"
+        > 
+          {item.getParameter('Rev').getValue()} 
+        </span> 
       {:else}
-        <div class="w-8 md:w-6" />
+        <span> - </span> 
       {/if}
-
-      {#if isTreeItem}
-        <button
-          class="cursor-default hover:bg-gray-700 rounded p-1 w-8 md:w-6"
-          on:click={toggleVisibility}
+    </td>
+  
+    <td>  
+      {#if item.getParameter('Description')} 
+        <span
+          class="flex-1 border rounded px-1"
+          style="background-color: {highlighted
+            ? highlightBgColor
+            : 'transparent'}; border-color: {highlighted
+            ? highlightColor
+            : 'transparent'};"
         >
-          {#if visible}
-            <IconEye />
-          {:else}
-            <IconEyeOff />
-          {/if}
-        </button>
+          {item.getParameter('Description').getValue()} 
+        </span>
+      {:else}
+        <span> - </span> 
       {/if}
+    </td>
 
+    <td>
       <span
         class="flex-1 border rounded px-1"
         style="background-color: {highlighted
           ? highlightBgColor
           : 'transparent'}; border-color: {highlighted
           ? highlightColor
-          : 'transparent'};"
-        on:click={handleItemClick}
+          : 'transparent'};"  
       >
-        {item.getName()}
+      {item.getName()}
       </span>
-    </div>
+    </td> 
+  </tr>
 
-    {#if hasChildren && isExpanded}
-      <div
-        class="TreeItem__body ml-4 pl-4 md:ml-3 md:pl-3 border-dotted border-l-2 md:border-l"
-      >
-        {#if isTreeItem}
-          {#each item.getChildren() as childItem, i}
-            <svelte:self
-              item={childItem}
-              {selectionManager}
-              {undoRedoManager}
-              bind:this={childComponents[i]}
-            />
-          {/each}
-        {/if}
-      </div>
-    {/if}
-  </div>
+  {#if hasChildren && isExpanded}
+    <!-- <div
+      class="TreeItem__body ml-4 pl-4 md:ml-3 md:pl-3 border-dotted border-l-2 md:border-l"
+    > -->
+    <!-- <div> -->
+      {#if isTreeItem}
+        {#each item.getChildren() as childItem, i}
+          <svelte:self
+            item={childItem}
+            {selectionManager}
+            {undoRedoManager}
+            bind:this={childComponents[i]}
+            count="{count +1}"
+          />
+        {/each}
+      {/if}
+    <!-- </div> -->
+  {/if}
 {/if}
+
+
