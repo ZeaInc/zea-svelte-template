@@ -1,4 +1,4 @@
-import sha256 from 'sha256'
+import sha256 from 'js-sha256'
 
 // This template provides a very simple authentication
 // framework for building demos.

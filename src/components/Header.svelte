@@ -279,7 +279,7 @@
       </span>
     </button>
 
-    <img class="h-6" src="/images/logo-zea.svg" alt="logo" />
+    <img class="h-6" src="../../assets/images/logo-zea.svg" alt="logo" />
 
     <div class="hidden sm:block">
       <MenuBar>
