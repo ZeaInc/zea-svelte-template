@@ -9,97 +9,96 @@ function checkStatus(response) {
   return response
 }
 
-export function loadProductStructure(url) {
-  const folder = url.lastIndexOf('/') > -1 ? url.substring(0, url.lastIndexOf('/')) + '/' : ''
-  const filename = url.lastIndexOf('/') > -1 ? url.substring(url.lastIndexOf('/') + 1) : ''
+export default async function loadProductStructure(url, filename) {
+  const folder =
+    url.lastIndexOf('/') > -1
+      ? url.substring(0, url.lastIndexOf('/')) + '/'
+      : ''
+
   const stem = filename.substring(0, filename.lastIndexOf('.'))
-
-  const productStructure = new TreeItem('ProductStructure')
-
   const references = {}
 
-  resourceLoader.incrementWorkload(2) // load and parse
-  fetch(url)
-    .then((response) => {
-      resourceLoader.incrementWorkDone(1) // load complete
-      if (!checkStatus(response))
-        throw new Error(`Unable to load Product Structure: ${url}. ${response.status} - ${response.statusText}`)
-      return response.json()
-    })
-    .then((json) => {
-      parseExportInfo(json['Export_Info']).then(() => {
-        const root = parseTreeItem(json['Root'])
-        productStructure.addChild(root)
-
-        resourceLoader.incrementWorkDone(1) // parse complete
-        productStructure.emit('loaded')
-      })
-    })
-
-  const parseExportInfo = (json) => {
-    return new Promise((resolve) => {
-      parseReferenceList(json['Reference List']).then(() => {
-        resolve()
-      })
-    })
-  }
   const parseReferenceList = (json) => {
-    return new Promise((resolve) => {
-      const loadPromises = []
-      json.forEach((refJson) => loadPromises.push(parseReference(refJson)))
-
-      Promise.all(loadPromises).then(() => {
-        resolve()
+    json.forEach((refJson) => parseReference(refJson))
+  }
+  const loadReference = (reference) => {
+    reference.asset.load(reference.url).then(() => {
+      console.log('Done:', reference.Name)
+      const materials = reference.asset.getMaterialLibrary().getMaterials()
+      materials.forEach((material) => {
+        if (material.getShaderName() == 'StandardSurfaceShader') {
+          material.setShaderName('SimpleSurfaceShader')
+          const baseColorParam = material.getParameter('BaseColor')
+          if (baseColorParam) {
+            baseColorParam.setValue(baseColorParam.getValue().toGamma())
+          }
+        }
       })
     })
   }
   const parseReference = (json) => {
-    const url = folder + json.Name + '_Rep.zcad'
     const asset = new CADAsset()
-    asset.getParameter('FilePath').setValue(url)
+    const url = folder + json.url
+    console.log(url)
+    // asset.load(url).then(() => {
+    //   console.log('Done:', json.Name)
+    // })
 
     references[json.Name] = {
+      url,
       asset: asset,
       refs: 0, // Now many times this asset has been referenced in the tree.
     }
-    return new Promise((resolve) => {
-      asset.on('loaded', () => {
-        resolve(asset)
-      })
-    })
   }
   const parseTreeItem = (json) => {
-    const name = json.Instance ? json.Instance.instanceName : json.referenceName
     let treeItem
-
     // If this item references an asset we loaded earlier, then we use/clone the asset
-    if (json.Reference && json.Reference.referenceName in references) {
-      const reference = references[json.Reference.referenceName]
+    if (json.Reference in references) {
+      const reference = references[json.Reference]
       const asset = reference.asset
       if (reference.refs == 0) {
+        loadReference(reference)
         treeItem = asset
       } else {
         // After the first reference, we clone.
         // Note: this is a shallow clone and all the geometry data will be shared(instanced)
         treeItem = asset.clone()
       }
+      treeItem.setName(json.InstanceName)
       reference.refs++
     } else {
-      treeItem = new TreeItem(name)
+      treeItem = new TreeItem(json.Name)
     }
 
+    const xfo = new Xfo()
     if (json.matrix) {
       const mat4 = new Mat4()
       const d = json.matrix
       // mat4.set(d[0], d[1], d[2], 1, d[3], d[4], d[5], 1, d[6], d[7], d[8], 1, d[9], d[10], d[11], 1)
-      mat4.set(d[0], d[1], d[2], d[3], d[4], d[5], d[6], d[7], d[8], d[9], d[10], d[11], 0, 0, 0, 0)
+      mat4.set(
+        d[0],
+        d[1],
+        d[2],
+        d[3],
+        d[4],
+        d[5],
+        d[6],
+        d[7],
+        d[8],
+        d[9],
+        d[10],
+        d[11],
+        0,
+        0,
+        0,
+        0
+      )
       mat4.transposeInPlace()
-      const xfo = new Xfo()
       xfo.setFromMat4(mat4)
-      // xfo.tr.scaleInPlace(1 / 1000) // convert from millimeters to meters (optional)
-      treeItem.getParameter('LocalXfo').setValue(xfo)
+    } else if (json.xfo) {
+      xfo.fromJSON(json.xfo)
     }
-
+    treeItem.getParameter('LocalXfo').setValue(xfo)
     if (json.children) {
       json.children.forEach((childJson) => {
         const child = parseTreeItem(childJson)
@@ -109,5 +108,20 @@ export function loadProductStructure(url) {
     return treeItem
   }
 
-  return productStructure
+  resourceLoader.incrementWorkload(2) // load and parse
+  const response = await fetch(url)
+  resourceLoader.incrementWorkDone(1) // load complete
+  if (!checkStatus(response))
+    throw new Error(
+      `Unable to load Product Structure: ${url}. ${response.status} - ${response.statusText}`
+    )
+  const json = await response.json()
+
+  parseReferenceList(json['Reference List'])
+
+  const root = parseTreeItem(json['Root'])
+
+  resourceLoader.incrementWorkDone(1) // parse complete
+
+  return root
 }

@@ -24,6 +24,7 @@
 
   import { createClient } from '../ChannelMessenger.js'
   import buildTree from '../helpers/buildTree'
+  import loadProductStructure from '../helpers/loadProductStructure'
 
   const {
     Color,
@@ -97,6 +98,10 @@
       res = loadZCADAsset(url, filename)
     } else if (filename.endsWith('gltf') || filename.endsWith('glb')) {
       res = loadGLTFAsset(url, filename)
+    } else if (filename.endsWith('json')) {
+      loadProductStructure(url, filename).then((root) => {
+        $assets.addChild(root)
+      })
     }
 
     if (res) fileLoaded = true
@@ -274,16 +279,20 @@
     /** FPS DISPLAY END */
 
     /** LOAD ASSETS START */
-    let assetUrl
     if (!embeddedMode) {
       if (urlParams.has('zcad')) {
-        assetUrl = urlParams.get('zcad')
+        const assetUrl = urlParams.get('zcad')
         loadAsset(assetUrl, assetUrl)
         fileLoaded = true
-      }
-      if (urlParams.has('gltf')) {
-        assetUrl = urlParams.get('gltf')
+      } else if (urlParams.has('gltf')) {
+        const assetUrl = urlParams.get('gltf')
         loadAsset(assetUrl, assetUrl)
+        fileLoaded = true
+      } else if (urlParams.has('prdStruct')) {
+        const assetUrl = urlParams.get('prdStruct')
+        loadProductStructure(assetUrl, assetUrl).then((root) => {
+          $assets.addChild(root)
+        })
         fileLoaded = true
       }
     }
@@ -299,7 +308,6 @@
 
       if (collabEnabled) {
         const SOCKET_URL = 'https://websocket-staging.zea.live'
-        // const roomId = assetUrl
         const roomId = urlParams.get('roomId')
         const session = new Session(userData, SOCKET_URL)
         if (roomId) session.joinRoom(roomId)
