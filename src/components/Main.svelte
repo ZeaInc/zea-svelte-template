@@ -155,7 +155,7 @@
     /** SELECTION START */
     const cameraManipulator = renderer.getViewport().getManipulator()
     cameraManipulator.setDefaultManipulationMode(
-      CameraManipulator.MANIPULATION_MODES.tumbler
+      CameraManipulator.MANIPULATION_MODES.turntable
     )
     appData.cameraManipulator = cameraManipulator
     const toolManager = new ToolManager(appData)
