@@ -40,8 +40,12 @@
     CameraManipulator,
   } = window.zeaEngine
   const { CADAsset, CADBody } = window.zeaCad
-  const { SelectionManager, UndoRedoManager, ToolManager, SelectionTool } =
-    window.zeaUx
+  const {
+    SelectionManager,
+    UndoRedoManager,
+    ToolManager,
+    SelectionTool,
+  } = window.zeaUx
 
   const { Session, SessionSync } = window.zeaCollab
   const { GLTFAsset } = gltfLoader
@@ -60,6 +64,7 @@
   const filterItemSelection = (item) => {
     // Propagate selections up from the edges and surfaces up to
     // the part body or the instanced body
+    const srcItem = item
     while (
       item &&
       !(item instanceof CADBody) &&
@@ -67,7 +72,7 @@
     ) {
       item = item.getOwner()
     }
-    return item
+    return item ? item : srcItem
   }
 
   /** LOAD ASSETS METHODS START */
