@@ -3,6 +3,7 @@
 
   import '../helpers/fps-display'
   import '../helpers/cull-stats'
+  import '../helpers/vr-ui'
 
   import Menu from '../components/ContextMenu/Menu.svelte'
   import MenuOption from '../components/ContextMenu/MenuOption.svelte'
@@ -39,6 +40,7 @@
     EnvMap,
     InstanceItem,
     CameraManipulator,
+    GeomItem,
   } = window.zeaEngine
   const { CADAsset, CADBody } = window.zeaCad
   const {
@@ -118,6 +120,8 @@
   onMount(async () => {
     renderer = new GLRenderer(canvas, {
       debugGeomIds: urlParams.has('debugGeomIds'),
+      enableFrustumCulling: true,
+      enableOcclusionCulling: false,
     })
 
     $scene = new Scene()
@@ -133,12 +137,20 @@
     renderer.outlineThickness = 0.5
     renderer.outlineColor = new Color(0.2, 0.2, 0.2, 1)
 
+    renderer
+      .getViewport()
+      .getCamera()
+      .setPositionAndTarget(new Vec3(-80, -40, 20), new Vec3(40, 80, 10))
     // $scene.setupGrid(10, 10)
     $scene
       .getSettings()
       .getParameter('BackgroundColor')
       .setValue(new Color(0.85, 0.85, 0.85, 1))
     renderer.setScene($scene)
+
+    // renderer.on('CullingUpdated', (event) => {
+    //   console.log(`visible: ${event.visible} / total: ${event.total} `)
+    // })
 
     appData.renderer = renderer
     appData.scene = $scene
@@ -249,16 +261,16 @@
 
         // To provide a simple selection when the SelectionTool is not activated,
         // we toggle selection on the item that is selcted.
-        const item = filterItemSelection(event.intersectionData.geomItem)
-        if (item) {
-          if (!event.shiftKey) {
-            $selectionManager.toggleItemSelection(item, !event.ctrlKey)
-          } else {
-            const items = new Set()
-            items.add(item)
-            $selectionManager.deselectItems(items)
-          }
-        }
+        // const item = filterItemSelection(event.intersectionData.geomItem)
+        // if (item) {
+        //   if (!event.shiftKey) {
+        //     $selectionManager.toggleItemSelection(item, !event.ctrlKey)
+        //   } else {
+        //     const items = new Set()
+        //     items.add(item)
+        //     $selectionManager.deselectItems(items)
+        //   }
+        // }
       } else if (event.button == 2 && event.intersectionData) {
         const item = filterItemSelection(event.intersectionData.geomItem)
         openMenu(event, item)
@@ -282,6 +294,15 @@
     const fpsDisplay = document.createElement('fps-display')
     fpsDisplay.renderer = renderer
     fpsContainer.appendChild(fpsDisplay)
+
+    const cullStats = document.createElement('cull-stats')
+    cullStats.renderer = renderer
+    fpsContainer.appendChild(cullStats)
+
+    console.log('perfTest:', urlParams.has('perfTest'))
+    if (urlParams.has('perfTest')) {
+      renderer.startContinuousDrawing()
+    }
     /** FPS DISPLAY END */
 
     /** LOAD ASSETS START */
@@ -430,6 +451,7 @@
       vrToolManager.pushTool('VRUITool')
     })
     /** VR TOOLS SETUP END */
+
     APP_DATA.set(appData)
   })
 
