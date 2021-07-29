@@ -181,7 +181,7 @@
     const result = materials[materialId][mode]
     geomItem.getParameter('Material').setValue(result)
   }
-  const cacheMaterial = (geomItem)=>{
+  const cacheMaterial = (geomItem) => {
     const geomItemId = geomItem.getId()
     const material = geomItem.getParameter('Material').getValue()
     const materialId = material.getId()
@@ -194,8 +194,7 @@
     }
   }
 
-
-  const handleChangeRenderModeWireframe = (pub=true) => {
+  const handleChangeRenderModeWireframe = (pub = true) => {
     if (mode == RENDER_MODES.WIREFRAME) {
       return
     }
@@ -215,7 +214,7 @@
     })
     if (pub && session) session.pub('setRenderMode', { mode: 'WIREFRAME' })
   }
-  const handleChangeRenderModeFlatWhite = (pub=true) => {
+  const handleChangeRenderModeFlatWhite = (pub = true) => {
     if (mode == RENDER_MODES.FLAT_WHITE) {
       return
     }
@@ -244,7 +243,7 @@
     mode = RENDER_MODES.FLAT_WHITE
     if (pub && session) session.pub('setRenderMode', { mode: 'FLAT_WHITE' })
   }
-  const handleChangeRenderModeFlat = (pub=true) => {
+  const handleChangeRenderModeFlat = (pub = true) => {
     if (mode == RENDER_MODES.FLAT) {
       return
     }
@@ -287,7 +286,7 @@
     if (pub && session) session.pub('setRenderMode', { mode: 'FLAT' })
   }
 
-  const handleChangeRenderModeHiddenLine = (pub=true) => {
+  const handleChangeRenderModeHiddenLine = (pub = true) => {
     if (mode == RENDER_MODES.HIDDEN_LINE) {
       return
     }
@@ -318,7 +317,10 @@
               }
             } else {
               newMaterial.setShaderName('FlatSurfaceShader')
-              const color = newMaterial.getParameter('BaseColor').getValue().clone()
+              const color = newMaterial
+                .getParameter('BaseColor')
+                .getValue()
+                .clone()
               color.a = 0.6
               newMaterial.getParameter('BaseColor').setValue(color)
               // newMaterial.getParameter('BaseColor').setValue(backgroundColor)
@@ -331,7 +333,7 @@
     if (pub && session) session.pub('setRenderMode', { mode: 'HIDDEN_LINE' })
   }
 
-  const handleChangeRenderModeShadedAndEdges = (pub=true) => {
+  const handleChangeRenderModeShadedAndEdges = (pub = true) => {
     if (mode == RENDER_MODES.SHADED_AND_EDGES) {
       return
     }
@@ -368,10 +370,11 @@
       }
     })
     mode = RENDER_MODES.SHADED_AND_EDGES
-    if (pub && session) session.pub('setRenderMode', { mode: 'SHADED_AND_EDGES' })
+    if (pub && session)
+      session.pub('setRenderMode', { mode: 'SHADED_AND_EDGES' })
   }
-  
-  const handleChangeRenderModePBR = (pub=true) => {
+
+  const handleChangeRenderModePBR = (pub = true) => {
     if (mode == RENDER_MODES.PBR) {
       return
     }
@@ -399,30 +402,29 @@
   let bound = false
   onMount(async () => {
     APP_DATA.subscribe((appData) => {
-      if (!appData || bound) 
-        return
+      if (!appData || bound) return
       const { session } = appData
       if (session) {
         session.sub('setRenderMode', (data) => {
           switch (data.mode) {
-          case 'WIREFRAME': 
-            handleChangeRenderModeWireframe(false)
-            break
-          case 'FLAT': 
-            handleChangeRenderModeFlat(false)
-            break
-          case 'FLAT_WHITE': 
-            handleChangeRenderModeFlatWhite(false)
-            break
-          case 'HIDDEN_LINE': 
-            handleChangeRenderModeHiddenLine(false)
-            break
-          case 'SHADED_AND_EDGES': 
-            handleChangeRenderModeShadedAndEdges(false)
-            break
-          case 'PBR': 
-            handleChangeRenderModePBR(false)
-            break
+            case 'WIREFRAME':
+              handleChangeRenderModeWireframe(false)
+              break
+            case 'FLAT':
+              handleChangeRenderModeFlat(false)
+              break
+            case 'FLAT_WHITE':
+              handleChangeRenderModeFlatWhite(false)
+              break
+            case 'HIDDEN_LINE':
+              handleChangeRenderModeHiddenLine(false)
+              break
+            case 'SHADED_AND_EDGES':
+              handleChangeRenderModeShadedAndEdges(false)
+              break
+            case 'PBR':
+              handleChangeRenderModePBR(false)
+              break
           }
         })
       }
@@ -453,7 +455,7 @@
   <ToolbarItem title="Perspective" on:click={handleChangeViewPerspective}>
     <IconPerspView />
   </ToolbarItem>
-
+  <!-- 
   <ToolbarItemPopup
     isHighlighted={mode !== RENDER_MODES.PBR}
     title="Renderer modes"
@@ -504,5 +506,5 @@
         <IconRenderModePBR />
       </ToolbarItem>
     </div>
-  </ToolbarItemPopup>
+  </ToolbarItemPopup> -->
 </div>
