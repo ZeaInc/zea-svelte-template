@@ -2,6 +2,7 @@
   import { onMount } from 'svelte'
 
   import '../helpers/fps-display'
+  import '../helpers/cull-stats'
 
   import Menu from '../components/ContextMenu/Menu.svelte'
   import MenuOption from '../components/ContextMenu/MenuOption.svelte'
@@ -45,6 +46,9 @@
     UndoRedoManager,
     ToolManager,
     SelectionTool,
+    VRUITool,
+    VRHoldObjectsTool,
+    CreateFreehandLineTool,
   } = window.zeaUx
 
   const { Session, SessionSync } = window.zeaCollab
@@ -399,6 +403,36 @@
     })
     /** DYNAMIC SELECTION UI END */
 
+    /** VR TOOLS SETUP START */
+
+    const holdObjectsTool = new VRHoldObjectsTool(appData)
+    const freehandLineTool = new CreateFreehandLineTool(appData)
+
+    const vrToolManager = new ToolManager(appData)
+
+    // Register both tools.
+    vrToolManager.registerTool('VRHoldObjectsTool', holdObjectsTool)
+    vrToolManager.registerTool('Freehand Line Tool', freehandLineTool)
+
+    const vrUIDOMElement = document.createElement('vr-ui')
+
+    vrUIDOMElement.setRenderer(renderer)
+    vrUIDOMElement.setToolManager(vrToolManager)
+
+    document.body.appendChild(vrUIDOMElement)
+    const vrUITool = new VRUITool(appData, vrUIDOMElement.contentDiv)
+    vrToolManager.registerTool('VRUITool', vrUITool)
+    // vrUITool.controllerUI.activate()
+
+    renderer.getXRViewport().then((xrViewport) => {
+      const viewManipulator = xrViewport.getManipulator()
+
+      vrToolManager.registerTool('VRViewManipulator', viewManipulator)
+      xrViewport.setManipulator(vrToolManager)
+      vrToolManager.pushTool('VRViewManipulator')
+      vrToolManager.pushTool('VRUITool')
+    })
+    /** VR TOOLS SETUP END */
     APP_DATA.set(appData)
   })
 
