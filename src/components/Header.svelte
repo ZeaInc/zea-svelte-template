@@ -25,6 +25,7 @@
   const collabEnabled = urlParams.has('roomId')
   let vrToggleMenuItemLabel = 'Detecting VR...'
   let vrToggleMenuItemDisabled = true
+  $ui.shouldShowDrawer = false
 
   let cameraManipulator
   let isTumblerEnabled = true
@@ -79,14 +80,18 @@
       CameraManipulator.MANIPULATION_MODES.turntable
     )
     // The Tumbler mode prevents the camera from rolling upside down, so we correct it here.
-    const cameraXfo = renderer.getViewport().getCamera().getParameter('GlobalXfo').getValue()
+    const cameraXfo = renderer
+      .getViewport()
+      .getCamera()
+      .getParameter('GlobalXfo')
+      .getValue()
     const zaxis = cameraXfo.ori.getZaxis()
     let t = 0
     const id = setInterval(() => {
       t += 0.1
       const quat = new Quat()
       const xfo = cameraXfo.clone()
-      quat.setFromDirectionAndUpvector(zaxis, new Vec3(0,0,1))
+      quat.setFromDirectionAndUpvector(zaxis, new Vec3(0, 0, 1))
       xfo.ori = cameraXfo.ori.lerp(quat, Math.min(t, 1.0))
       renderer.getViewport().getCamera().getParameter('GlobalXfo').setValue(xfo)
       if (t >= 1.0) clearInterval(id)
