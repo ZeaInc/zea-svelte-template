@@ -39,12 +39,8 @@ export default async function loadProductStructure(url, filename) {
   const parseReference = (json) => {
     const asset = new CADAsset()
     const url = folder + json.url
-    console.log(url)
-    // asset.load(url).then(() => {
-    //   console.log('Done:', json.Name)
-    // })
-
     references[json.Name] = {
+      Name: json.Name,
       url,
       asset: asset,
       refs: 0, // Now many times this asset has been referenced in the tree.
