@@ -39,34 +39,10 @@
       "tr": { "x": 0.0, "y": 0.0, "z": 0.0 },
       "ori": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }
     },
-    "children": [
+    "_children": [
       {
-        "Reference": "Autodesk_Hospital_Site",
-        "InstanceName": "Site",
-        "xfo": {
-          "tr": { "x": 0.0, "y": 0.0, "z": -166.85 },
-          "ori": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }
-        }
-      },
-      {
-        "Reference": "Autodesk_Hospital_Structural",
-        "InstanceName": "Structural",
-        "xfo": {
-          "tr": { "x": 0.0, "y": 0.0, "z": 0.0 },
-          "ori": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }
-        }
-      },
-      {
-        "Reference": "Autodesk_Hospital_Electrical",
-        "InstanceName": "Electrical",
-        "xfo": {
-          "tr": { "x": 0.0, "y": 0.0, "z": 0.0 },
-          "ori": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }
-        }
-      },
-      {
-        "Reference": "Autodesk_Hospital_FireAlarm",
-        "InstanceName": "FireAlarm",
+        "Reference": "Autodesk_Hospital_Sprinkler",
+        "InstanceName": "Sprinkler",
         "xfo": {
           "tr": { "x": 0.0, "y": 0.0, "z": 0.0 },
           "ori": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }
@@ -81,8 +57,16 @@
         }
       },
       {
-        "Reference": "Autodesk_Hospital_Sprinkler",
-        "InstanceName": "Sprinkler",
+        "Reference": "Autodesk_Hospital_FireAlarm",
+        "InstanceName": "FireAlarm",
+        "xfo": {
+          "tr": { "x": 0.0, "y": 0.0, "z": 0.0 },
+          "ori": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }
+        }
+      },
+      {
+        "Reference": "Autodesk_Hospital_Electrical",
+        "InstanceName": "Electrical",
         "xfo": {
           "tr": { "x": 0.0, "y": 0.0, "z": 0.0 },
           "ori": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }
@@ -93,6 +77,24 @@
         "InstanceName": "HVAC",
         "xfo": {
           "tr": { "x": 0.0, "y": 0.0, "z": 0.0 },
+          "ori": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }
+        }
+      },
+      {
+        "Reference": "Autodesk_Hospital_Structural",
+        "InstanceName": "Structural",
+        "xfo": {
+          "tr": { "x": 0.0, "y": 0.0, "z": 0.0 },
+          "ori": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }
+        }
+      }
+    ],
+    "children": [
+      {
+        "Reference": "Autodesk_Hospital_Site",
+        "InstanceName": "Site",
+        "xfo": {
+          "tr": { "x": 0.0, "y": 0.0, "z": -166.85 },
           "ori": { "x": 0.0, "y": 0.0, "z": 0.0, "w": 1.0 }
         }
       },
