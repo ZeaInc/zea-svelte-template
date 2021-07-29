@@ -82,12 +82,9 @@
   /** LOAD ASSETS METHODS START */
   const loadZCADAsset = (url, filename) => {
     const asset = new CADAsset()
-    // TODO (engine-v3.10.0): frame all can occur in the initial load once the camera framing
-    // is updated.
-    asset.getGeometryLibrary().once('loaded', () => {
+    asset.load(url).then(() => {
       renderer.frameAll()
     })
-    asset.load(url).then(() => {})
     $assets.addChild(asset)
     return asset
   }
