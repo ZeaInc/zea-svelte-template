@@ -42,7 +42,7 @@ const copyToDist = () => ({
 
 export default {
   preserveEntrySignatures: false,
-  input: ['src/main.ts'],
+  input: ['src/main.js'],
   output: {
     sourcemap: true,
     format: 'esm',
