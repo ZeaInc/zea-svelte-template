@@ -5,8 +5,10 @@
   import IconEyeOff from '../components/icons/IconEyeOff.svelte'
   import IconChevronDown from '../components/icons/IconChevronDown.svelte'
   import IconChevronRight from '../components/icons/IconChevronRight.svelte'
-  const { CADBody } = window.zeaCad
-  const { TreeItem, InstanceItem } = window.zeaEngine
+
+  import { TreeItem, InstanceItem, Color } from '@zeainc/zea-engine'
+  import { CADBody } from '@zeainc/zea-cad'
+  import { ParameterValueChange } from '@zeainc/zea-ux'
 
   export let item
   export let selectionManager = null
@@ -18,6 +20,9 @@
   let childComponents = []
   let expandPath
   export function expandTree(path) {
+    if (path[path.length - 1] == item) {
+      return
+    }
     isExpanded = true
     if (childComponents.length > 0) {
       expandSubTree(path)
@@ -55,13 +60,8 @@
       highlighted = item.isHighlighted()
 
       if (highlighted && 'getHighlight' in item) {
-        const { Color } = globalThis.zeaEngine
-
         const itemHighlightColor = item.getHighlight()
-        const bgColor = itemHighlightColor.lerp(
-          new Color(0.75, 0.75, 0.75, 0),
-          0.5
-        )
+        const bgColor = itemHighlightColor.lerp(new Color(0.75, 0.75, 0.75, 0), 0.5)
 
         highlightColor = itemHighlightColor.toHex()
         highlightBgColor = `${bgColor.toHex()}60`
@@ -84,7 +84,6 @@
     visible = !visibleParam.getValue()
 
     if (undoRedoManager) {
-      const { ParameterValueChange } = globalThis.zeaUx
       const change = new ParameterValueChange(visibleParam, visible)
       undoRedoManager.addChange(change)
       return
@@ -116,12 +115,6 @@
       return
     }
 
-    if (!globalThis.zeaEngine) {
-      throw new Error(
-        '`zeaEngine` is missing from the `globalThis` property. This component requires it.'
-      )
-    }
-
     // This reference to the element is added so the component can navigate
     // using the keyboard.
     item.elemRef = el
@@ -150,8 +143,7 @@
       // This code is for a special case when items are replaced in the
       // TreeView and we don't load the component again.
       const isBody = item instanceof CADBody
-      const isInstancedBody =
-        item instanceof InstanceItem && item.getSrcTree() instanceof CADBody
+      const isInstancedBody = item instanceof InstanceItem && item.getSrcTree() instanceof CADBody
       hasChildren = item.getNumChildren() > 0 && !isBody && !isInstancedBody
     }
 
@@ -174,14 +166,9 @@
 
 {#if item}
   <div bind:this={el} class="TreeItem" class:text-gray-500={!visible}>
-    <div
-      class="TreeItem__header flex items-center cursor-default hover:bg-gray-800 transition-colors mb-1"
-    >
+    <div class="TreeItem__header flex items-center cursor-default hover:bg-gray-800 transition-colors mb-1">
       {#if hasChildren}
-        <button
-          class="cursor-default hover:bg-gray-700 rounded w-8 md:w-6"
-          on:click={toggleIsExpanded}
-        >
+        <button class="cursor-default hover:bg-gray-700 rounded w-8 md:w-6" on:click={toggleIsExpanded}>
           {#if isExpanded}
             <IconChevronDown />
           {:else}
@@ -193,10 +180,7 @@
       {/if}
 
       {#if isTreeItem}
-        <button
-          class="cursor-default hover:bg-gray-700 rounded p-1 w-8 md:w-6"
-          on:click={toggleVisibility}
-        >
+        <button class="cursor-default hover:bg-gray-700 rounded p-1 w-8 md:w-6" on:click={toggleVisibility}>
           {#if visible}
             <IconEye />
           {:else}
@@ -207,9 +191,7 @@
 
       <span
         class="flex-1 border rounded px-1"
-        style="background-color: {highlighted
-          ? highlightBgColor
-          : 'transparent'}; border-color: {highlighted
+        style="background-color: {highlighted ? highlightBgColor : 'transparent'}; border-color: {highlighted
           ? highlightColor
           : 'transparent'};"
         on:click={handleItemClick}
@@ -219,17 +201,10 @@
     </div>
 
     {#if hasChildren && isExpanded}
-      <div
-        class="TreeItem__body ml-4 pl-4 md:ml-3 md:pl-3 border-dotted border-l-2 md:border-l"
-      >
+      <div class="TreeItem__body ml-4 pl-4 md:ml-3 md:pl-3 border-dotted border-l-2 md:border-l">
         {#if isTreeItem}
           {#each item.getChildren() as childItem, i}
-            <svelte:self
-              item={childItem}
-              {selectionManager}
-              {undoRedoManager}
-              bind:this={childComponents[i]}
-            />
+            <svelte:self item={childItem} {selectionManager} {undoRedoManager} bind:this={childComponents[i]} />
           {/each}
         {/if}
       </div>
