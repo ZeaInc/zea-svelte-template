@@ -281,15 +281,13 @@
       }
     }
     /** LOAD ASSETS END */
+
     /** COLLAB START*/
     if (!embeddedMode) {
       const userData = await auth.getUserData()
-      if (!userData) {
-        return
-      }
       appData.userData = userData
 
-      if (collabEnabled) {
+      if (collabEnabled && userData) {
         const SOCKET_URL = 'https://websocket-staging.zea.live'
         // const roomId = assetUrl
         const roomId = urlParams.get('roomId')
@@ -525,7 +523,7 @@
       <Toolbar />
     </div>
     {#if !fileLoaded}
-      <DropZone bind:files on:changeFile={handleCadFile} />
+      <DropZone bind:files on:changeFile={handleCadFile} {fileLoaded} />
     {/if}
   </div>
 </main>

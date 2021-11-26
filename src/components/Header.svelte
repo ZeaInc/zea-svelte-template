@@ -40,6 +40,7 @@
   let userData
 
   document.addEventListener('keydown', (event) => {
+    if (!renderer) return
     const canvasIsTarget = event.target.contains(renderer.getGLCanvas())
 
     if (!canvasIsTarget) {
@@ -178,17 +179,14 @@
   // UX
 
   const handleFrameAll = () => {
-    const { renderer } = $APP_DATA
     renderer.frameAll()
   }
 
   const handleUndo = () => {
-    const { undoRedoManager } = $APP_DATA
     undoRedoManager.undo()
   }
 
   const handleRedo = () => {
-    const { undoRedoManager } = $APP_DATA
     undoRedoManager.redo()
   }
 
@@ -221,8 +219,6 @@
   // VR
 
   const handleLaunchVR = () => {
-    const { renderer } = $APP_DATA
-
     renderer
       .getXRViewport()
       .then((xrViewport) => {
@@ -231,13 +227,6 @@
       .catch((reason) => {
         console.warn('Unable to setup XR:' + reason)
       })
-  }
-
-  const handleToggleVRSpatatorMode = () => {
-    const { renderer } = $APP_DATA
-    renderer.getXRViewport().then((xrViewport) => {
-      xrViewport.spectatorMode = !xrViewport.spectatorMode
-    })
   }
 
   const handleSignOut = async () => {
@@ -320,12 +309,13 @@
       {#if !collabEnabled}
         <div class="flex-1" />
       {/if}
-
-      <UserChip user={$APP_DATA.userData}>
-        <div class="text-center">
-          <Button on:click={handleSignOut}>Sign Out</Button>
-        </div>
-      </UserChip>
+      {#if $APP_DATA.userData}
+        <UserChip user={$APP_DATA.userData}>
+          <div class="text-center">
+            <Button on:click={handleSignOut}>Sign Out</Button>
+          </div>
+        </UserChip>
+      {/if}
     {/if}
   </header>
 {/if}
