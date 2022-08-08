@@ -61,7 +61,7 @@ npm install
 npm run dev
 ```
 
-5. Use your browser to go to: http://localhost:5000/
+5. Use your browser to go to: http://localhost:5001/
 
 6. Build something awesome.
 
@@ -70,8 +70,8 @@ npm run dev
 | Syntax  | Description                                      |
 | ------- | ------------------------------------------------ |
 | `build` | Build app with pre-rendering and dynamic imports |
-| `dev`   | Development (port 5000)                          |
-| `serve` | Run after a build to preview. Serves SPA on 5000 |
+| `dev`   | Development (port 5001)                          |
+| `serve` | Run after a build to preview. Serves SPA on 5001 |
 
 # Features
 
